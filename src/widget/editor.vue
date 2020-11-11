@@ -20,12 +20,12 @@
         
         <div class="va-action-bar">
             <div class="va-30 va-status-bar">
-                <button type="button" class="va-common-button" v-on:click="previewVisible = !previewVisible">预览</button>
-                <button type="button" class="va-common-button" v-on:click="smiliesVisible = !smiliesVisible">表情</button>
+                <button type="button" class="va-common-button" v-on:click="previewVisible = !previewVisible">Markdown</button>
+                <button type="button" class="va-common-button" v-if="false" v-on:click="smiliesVisible = !smiliesVisible">表情</button>
             </div>
             <div class="va-70 va-tools-bar">
                 <div class="va-captcha">
-                    <input type="text" class="va-input n-m-w va-captcha-field" v-model="formData.captcha">
+                    <input type="text" class="va-input n-m-w va-captcha-field" placeholder="验证码" v-model="formData.captcha">
                     <img v-bind:src="captchaUrl" v-on:click="refreshCaptcha"></img>
                 </div>
                 <button type="button" class="va-common-button" v-on:click="onComment">提交</button>
@@ -203,9 +203,32 @@ export default Vue.extend({
                 return
             }
 
-            if (!this.formData.captcha) {
-                this.showAlert('需要填写验证码')
-                return
+            if (process.env.NODE_ENV === 'production')
+            {
+                if (!this.formData.captcha) {
+                    this.showAlert('需要填写验证码')
+                    return
+                }
+            }
+
+            if (this.formData.mail)
+            {
+                let reg = new RegExp('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$', 'g')
+                if (!this.formData.mail.match(reg))
+                {
+                    this.showAlert('邮箱格式不正确')
+                    return
+                }
+            }
+
+            if (this.formData.website)
+            {
+                let reg = new RegExp('^https?://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?$', 'g')
+                if (!this.formData.website.match(reg))
+                {
+                    this.showAlert('网站格式不正确(建议使用http://或者https://开头)')
+                    return
+                }
             }
 
             this.owner.submit({

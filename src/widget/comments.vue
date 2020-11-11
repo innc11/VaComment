@@ -8,7 +8,10 @@
 
             <div class="va-comment-container" v-bind:comment-id="comment.id">
                 <div class="va-comment-info">
-                    <a class="va-nick va-text" rel="nofollow" v-bind:href="comment.website" target="_blank">{{comment.nick}}</a>
+                    <a class="va-nick va-text" rel="nofollow" target="_blank"
+                        v-bind:href="comment.website" 
+                        v-bind:style="comment.website? 'cursor: pointer;':'cursor: not-allowed;'"
+                    >{{comment.nick}}</a>
                     <span class="va-browser va-text">{{comment.browser}}</span>
                     <span class="va-os va-text">{{comment.os}}</span>
                 </div>
@@ -90,9 +93,14 @@
 
     .va-reply-button {
         font-size: .8125em;
-        color: #ef2f11;
+        color: #aa8f70;
         cursor: pointer;
-        float: right;
+        margin-left: 1rem;
+        /* float: right; */
+    }
+
+    .va-reply-button:hover {
+        color: #ffb35c;
     }
 
     .va-comment-container {

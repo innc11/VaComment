@@ -3,20 +3,22 @@ import Vue from 'vue'
 import { ServerSideError } from "./exception"
 import indexvue from './index.vue'
 import { CreateElement } from 'vue/types/umd'
+const cookies = require('brownies')
 const uadetector = require('./userAgentDetector.js')
 const moment = require('moment');
 
 export default class Valine
 {
     apiUrl: string
-    vue: any // Vue实例
+    index: any // Vue实例
     editor: any // Vue实例
+    paginator: any // Vue实例
     
-    constructor(id='va-comment-widget', apiUrl='http://127.0.0.1:8000')
+    constructor(id='va-comment-widget', apiUrl='http://127.0.0.1:600')
     {
         this.apiUrl = apiUrl
 
-        // this.vue = new Vue({
+        // this.index = new Vue({
         //     el: '#'+id,
         //     components: {
         //         'va-comment-widget': comment
@@ -28,48 +30,30 @@ export default class Valine
         //     // }
         // }).$children[0]
 
-        this.vue = new Vue({
+        this.index = new Vue({
             el: '#'+id,
             render: (e: CreateElement) => e(indexvue)
         }).$children[0]
 
-        for (let index in this.vue.$children)
-        {
-            console.log(this.vue.$children[index].$vnode.tag.replace(new RegExp('vue-component-\\d+-'), ''))
-            if (this.vue.$children[index].$vnode.tag.replace(new RegExp('vue-component-\\d+-'), '') == 'va-editor-widget') {
-                console.log('asfffffff')
-                this.editor = this.vue.$children[index]
-            }
-        }
+        this.editor = this.lookupVueComponent('va-editor-widget')
+        this.paginator = this.lookupVueComponent('va-paginator')
 
-        console.log(this.editor)
+        this.index.owner = this
+        this.paginator.owner = this
 
-        this.vue.owner = this
-
+        this.loadCookies()
         this.refresh()
+    }
 
-        let cmt = {
-            avatar: 'https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png',
-            nick: '_nick',
-            website: '-Link',
-            content: 'gangangan',
-            time: 154489864,
+    lookupVueComponent(componentName: string)
+    {
+        for (let index in this.index.$children)
+        {
+            if (this.index.$children[index].$vnode.tag.replace(new RegExp('vue-component-\\d+-'), '') == componentName)
+                return this.index.$children[index]
         }
 
-
-        return
-
-        this.vue.allComments.push({
-            id: 56,
-            avatar: cmt.avatar,
-            nick: cmt.nick,
-            website: cmt.website,
-            browser: '_browser',
-            os: '_os',
-            time: cmt.time,
-            content: cmt.content,
-            replies: []
-        })
+        return null
     }
 
     checkIfServerSide(): void
@@ -80,10 +64,30 @@ export default class Valine
         }
     }
 
+    loadCookies()
+    {
+        if (cookies.cookies.va_nick)
+            this.editor.formData.nick = cookies.cookies.va_nick
+        if (cookies.cookies.va_mail)
+            this.editor.formData.mail = cookies.cookies.va_mail
+        if (cookies.cookies.va_website)
+            this.editor.formData.website = cookies.cookies.va_website
+    }
+
+    storageCookies()
+    {
+        cookies.cookies.va_nick = this.editor.formData.nick
+        cookies.cookies.va_mail = this.editor.formData.mail
+        cookies.cookies.va_website = this.editor.formData.website
+    }
+
     refresh()
     {
-        fetch('http://127.0.0.1:600?url='+location.pathname, {
-            cache: 'no-cache'
+        this.index.isLoading = true
+
+        fetch(this.apiUrl+'?url='+location.pathname+'&pagination='+this.paginator.current, {
+            cache: 'no-cache',
+            credentials: 'include'
         })
             .then((response) => 
                 response.json()
@@ -120,16 +124,25 @@ export default class Valine
                     return allcomments
                 }
 
-                this.vue.allComments = parseData(json);
-                
+                // 加载(并显示)评论数据
+                this.index.allComments = parseData(json.comments)
+
+                // 加载分页数据
+                this.paginator.total = json.pages
+
+                this.index.commentCount = json.count
+
+                // 隐藏加载动画
+                this.index.isLoading = false
             }).catch((e) => {
                 console.log('发生错误: '+e);
+                this.index.isLoading = false
             })
     }
 
     submit(comment: any)
     {
-        comment.parent = this.vue.replyId
+        comment.parent = this.index.replyId
         // fetch(, {
         //     method: 'POST',
         //     body: JSON.stringify(comment),
@@ -143,12 +156,12 @@ export default class Valine
         //     console.log('发生错误: '+e);
         // })
 
-        let URL = 'http://127.0.0.1:600?url='+location.pathname
+        let URL = this.apiUrl+'?url='+location.pathname
         $.ajax({
             url: URL,      async:    true,    type: 'POST',
             cache: false,  dataType: "json",  data: JSON.stringify(comment),
             xhrFields: {
-                withCredentials: true
+                withCredentials: true // 必须带上cookie
             },
             success: (res: string) => {
             },
@@ -160,7 +173,12 @@ export default class Valine
                     this.editor.showAlert('发表评论失败<br/>原因：'+xhr.responseText+'<br>(通常是验证码不正确)')
                 } else {
                     this.editor.formData.content = ''
-                    this.editor.showAlert('已发布!')
+
+                    if (process.env.NODE_ENV === 'production') {
+                        this.editor.showAlert('已发布!')
+                    }
+
+                    this.storageCookies()
                 }
                 this.editor.refreshCaptcha()
             }
@@ -169,12 +187,17 @@ export default class Valine
 
     getCaptchaAPI()
     {
-        return 'http://127.0.0.1:600/captcha.php'
+        return this.apiUrl+'/captcha.php'
     }
 
     static version()
     {
         return require('../package.json').version;
+    }
+
+    static isProduction()
+    {
+        return process.env.NODE_ENV === 'production'
     }
 }
 

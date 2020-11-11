@@ -9,7 +9,7 @@
             ></va-editor-widget>
         </div>
 
-        <div class="va-comment-count">{{allComments.length}} 评论</div>
+        <div class="va-comment-count">{{commentCount}} 评论</div>
         
         <div class="va-all-comments">
             <va-comment 
@@ -21,13 +21,11 @@
             ></va-comment>
         </div>
 
-        <div class="va-loading-indicator">
-        
+        <div class="va-loading-indicator" v-show="isLoading">
+            正在加载
         </div>
 
-        <div class="va-pagination">
-
-        </div>
+        <va-paginator></va-paginator>
     </div>
 </template>
 
@@ -88,6 +86,27 @@
         max-width: 300px;
     }
 
+    .va-loading-indicator {
+        text-align: center;
+    }
+    .va-loading-indicator:before {
+        box-sizing: border-box;
+        content: "";
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border: 6px double #a0a0a0;
+        border-top-color: transparent;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        animation: spin 2s infinite linear;
+    }
+
+    @keyframes spin
+    {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(1turn); }
+    }
 </style>
 
 <script lang="ts">
@@ -95,6 +114,7 @@ import Vue from 'vue'
 import CommentModel from './commentModel'
 import comments from './widget/comments.vue'
 import editor from './widget/editor.vue'
+import paginator from './widget/paginator.vue'
 import Valine from '.'
 
 export default Vue.extend({
@@ -104,7 +124,9 @@ export default Vue.extend({
         return {
             owner: null,
             allComments: [],
+            commentCount: 0,
             isReplying: false,
+            isLoading: false,
             replyId: -1
         }
     },
@@ -151,7 +173,8 @@ export default Vue.extend({
     },
     components: {
         'va-comment': comments,
-        'va-editor-widget': editor
+        'va-editor-widget': editor,
+        'va-paginator': paginator
     }
 })
 </script>
