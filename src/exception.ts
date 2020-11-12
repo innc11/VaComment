@@ -7,12 +7,12 @@ export class ServerSideError extends Error
     }
 }
 
-export class EmptyConfigurationStruct extends Error
+export class MissingNecessaryFieldError extends Error
 {
-    constructor()
+    constructor(fieldName: string)
     {
-        super('Please give at least one parameter.')
-        this.name = 'EmptyConfigurationStruct'
+        super('The parameter of "'+fieldName+'" must be given.')
+        this.name = 'MissingNecessaryFieldError'
     }
 }
 

@@ -6,6 +6,7 @@
             v-bind:class="i-1==current? 'active':''"
             v-bind:pagination="i-1"
             v-on:click="onClickPagination"
+            v-show="total>1"
         >{{i}}</div>
         <!-- <div class="va-pagin-next">下</div> -->
     </div>

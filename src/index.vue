@@ -9,11 +9,11 @@
             ></va-editor-widget>
         </div>
 
-        <div class="va-comment-count">{{commentCount}} 评论</div>
+        <div class="va-comment-count"><span v-html="commentCount+' 评论'"></span></div>
         
         <div class="va-all-comments">
             <va-comment 
-                v-for="comment in sorted()"
+                v-for="comment in allComments"
                 v-bind:comment="comment" 
                 v-bind:is-replying="isReplying"
                 v-bind:smaller-avatar="false"
@@ -57,6 +57,7 @@
         font-weight: 600;
         font-size: 1.25em;
         text-align: center;
+        margin-bottom: 1rem;
     }
 
     .va-common-button {
@@ -158,17 +159,6 @@ export default Vue.extend({
             $('#va-comment-editor').attr('placeholder', $('#va-comment-editor').attr('default-placeholder'))
 
             this.replyId = -1
-        },
-        sorted: function() {
-            function sortfun(obj1: CommentModel, obj2: CommentModel) {
-                if(!obj1.time && obj2.time)
-                    return 1
-                if(obj1.time && !obj2.time)
-                    return -1
-                return -1
-            }
-            
-            return this.allComments.slice(0).sort(sortfun)
         }
     },
     components: {

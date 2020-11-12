@@ -12,6 +12,13 @@
                         v-bind:href="comment.website" 
                         v-bind:style="comment.website? 'cursor: pointer;':'cursor: not-allowed;'"
                     >{{comment.nick}}</a>
+
+                    <span class="badge badge-pill badge-primary" style="margin: 0;"
+                        v-if="comment.isauthor"
+                    >
+                        <i class="fa fa-user-o" aria-hidden="true" style="display: none"></i>作者
+                    </span>
+
                     <span class="va-browser va-text">{{comment.browser}}</span>
                     <span class="va-os va-text">{{comment.os}}</span>
                 </div>
@@ -32,7 +39,7 @@
 
         <div class="va-comment-replies">
             <comment-list
-                v-for="cmt in sorted()"
+                v-for="cmt in comment.replies"
                 v-bind:comment="cmt" 
                 v-bind:is-replying="isReplying"
                 v-bind:smaller-avatar="true"
@@ -127,17 +134,6 @@ export default Vue.extend({
         }
     },
     methods: {
-        sorted: function() {
-            function sortfun(obj1: CommentModel, obj2: CommentModel) {
-                if(!obj1.time && obj2.time)
-                    return 1
-                if(obj1.time && !obj2.time)
-                    return -1
-                return -1
-            }
-            
-            return this.comment.replies.slice(0).sort(sortfun)
-        },
         indent: function(nick) {
             let hasParent = !!this.$parent.$options._parentVnode;
             if (hasParent) {
