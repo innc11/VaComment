@@ -1,0 +1,43 @@
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env: 
+      token: ${{ secrets.TOKEN }}
+      branch: pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Load Cache
+        uses: actions/cache@v2
+        env: 
+          cache-name: node-modules
+        with: 
+          path: ./node_modules
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+      
+      - name: Build
+        run: |
+          yarn
+          yarn run build
+          
+      - name: Depoly
+        run: |
+          cd dist
+          git init
+          git config user.email innc11@163.com
+          git config user.name innc11
+          git status
+          git remote add github https://$token@github.com/$GITHUB_REPOSITORY
+          git checkout -b $branch
+          git add --all
+          git commit -m "Auto deploy from Github Actinos #$GITHUB_RUN_NUMBER"
+          git push github $branch --force
+          echo "Successfully deployed!"
+          echo "See: https://github.com/$GITHUB_REPOSITORY/tree/$branch"
