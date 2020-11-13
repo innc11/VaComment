@@ -57,7 +57,9 @@ export default class Valine
         this.loadCookies()
         
         this.index.isLoading = true // 加载动画
-        this.refresh()
+        setTimeout(() => {
+            this.refresh()
+        }, 30);
     }
 
     lookupVueComponent(componentName: string)
@@ -190,7 +192,7 @@ export default class Valine
                     this.editor.formData.content = ''
 
                     if (process.env.NODE_ENV === 'production') {
-                        this.editor.showAlert('已发布!')
+                        this.editor.showAlert('已发布!如果不能正常显示请尝试刷新一下')
                     }
 
                     this.storageCookies()
@@ -207,7 +209,7 @@ export default class Valine
 
     static version()
     {
-        return 'v'+require('../package.json').version;
+        return require('../package.json').version;
     }
 
     static isProduction()
