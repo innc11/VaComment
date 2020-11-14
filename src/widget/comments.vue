@@ -13,7 +13,7 @@
                         v-bind:style="comment.website? 'cursor: pointer;':'cursor: not-allowed;'"
                     >{{comment.nick}}</a>
 
-                    <span class="badge badge-pill badge-primary" style="margin: 0;"
+                    <span class="badge badge-pill badge-info" style="margin: 0;"
                         v-if="comment.isauthor"
                     >
                         <i class="fa fa-user-o" aria-hidden="true" style="display: none"></i>作者
@@ -134,19 +134,34 @@ export default Vue.extend({
         }
     },
     methods: {
-        indent: function(nick) {
+        indent: function(subNick) {
             let hasParent = !!this.$parent.$options._parentVnode;
+
             if (hasParent) {
                 let reg = new RegExp('vue\\-component\\-\\d+\\-', 'g')
                 let parentComponentTag = this.$parent.$options._parentVnode.tag.replace(reg, '')
 
                 if (parentComponentTag=='comment-list') // 如果父组件和本组件都是comment-list组件
-                    if (this.$parent.comment.nick == nick) // 判断一下是否为同一个人
-                        return false
+                    hasParent = true
+                else
+                    hasParent = false
+            }
+            
+            let parentNick = hasParent? this.$parent.comment.nick:null
+            let selfNick = this.comment.nick
+
+            if (hasParent) {
+                if (parentNick == subNick) // 判断父评论和孙评论是否为同一个人
+                    return false
             }
 
-            if (this.comment.nick == nick) // 自己回复自己
+            if (hasParent && selfNick == subNick) // 自己回复自己(父评论和子评论是否为同一人)，但顶层评论无论如何都需要缩进
                 return false
+            
+            if (hasParent) {
+                if (parentNick == selfNick && selfNick != subNick) // 判断父评论和子评论是同一个人，但是孙评论又是另外一个人（这是考虑到了连续评论的情况）
+                    return false
+            }
 
             return true
         },
