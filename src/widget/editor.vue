@@ -34,7 +34,7 @@
 
         <div class="va-smilies" v-show="smiliesVisible">表情面板</div>
         <div class="va-preview" v-show="previewVisible">
-            <div class="va-preview-tip">Markdown 预览</div>
+            <div class="va-preview-tip" style="text-align: center;">Markdown 预览</div>
             <div class="va-preview-content va-markdown" v-html="formData.content? parseMarkdown(formData.content):''"></div>
         </div>
 
@@ -120,7 +120,7 @@
         background: transparent;
         resize: vertical;
         transition: all .25s ease;
-        border: 1px solid seagreen;
+        border: 1px solid #2b805094;
     }
 
     .va-edit-panel {
