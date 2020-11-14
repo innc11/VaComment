@@ -59,7 +59,7 @@ export default class Valine
         this.index.isLoading = true // 加载动画
         setTimeout(() => {
             this.refresh()
-        }, 30);
+        }, 100);
     }
 
     lookupVueComponent(componentName: string)
@@ -131,7 +131,7 @@ export default class Valine
                             isauthor: comment.isauthor,
                             browser: ua.browser+' '+ua.version,
                             os: ua.os+' '+ua.osVersion,
-                            time: moment(comment.time * 1000).calendar(),
+                            time: moment(comment.time * 1000).format('YYYY-MM-DD HH:mm'),
                             content: comment.content,
                             replies: parseData(comment.replies.slice(0).sort(sortfun))
                         })
