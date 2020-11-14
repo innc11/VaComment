@@ -9,7 +9,7 @@
             ></va-editor-widget>
         </div>
 
-        <div class="va-comment-count"><span v-html="commentCount+' 评论'"></span></div>
+        <div class="va-comment-count"><span v-html="getCommentCount()"></span></div>
         
         <div class="va-all-comments">
             <va-comment 
@@ -94,9 +94,9 @@
         box-sizing: border-box;
         content: "";
         display: inline-block;
-        width: 40px;
-        height: 40px;
-        border: 6px double #a0a0a0;
+        width: 30px;
+        height: 30px;
+        border: 3px solid #a0a0a0;
         border-top-color: transparent;
         border-bottom-color: transparent;
         border-radius: 50%;
@@ -159,6 +159,15 @@ export default Vue.extend({
             $('#va-comment-editor').attr('placeholder', $('#va-comment-editor').attr('default-placeholder'))
 
             this.replyId = -1
+        },
+        getCommentCount: function()
+        {
+            if (this.commentCount > 0)
+            {
+                return this.commentCount+' 评论'
+            } else {
+                return ''
+            }
         }
     },
     components: {
