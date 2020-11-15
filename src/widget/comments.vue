@@ -1,16 +1,19 @@
 <template>
-    <div class="va-comment" >
-        <div class="va-comment-1">
+    <div class="va-comment">
+        <div class="va-comment-1" v-bind:id="'va-comment-id-'+comment.id">
             <img class="va-comment-avatar" 
                 v-bind:src="comment.avatar"
                 v-bind:class="smallerAvatar? 'va-comment-avatar-smaller':''"
+                v-bind:style="comment.website? 'cursor: pointer;':''"
+                v-bind:onclick="comment.website? 'window.open(\''+comment.website+'\', \'_blank\')':''"
             >
 
             <div class="va-comment-container" v-bind:comment-id="comment.id">
                 <div class="va-comment-info">
-                    <a class="va-nick va-text" rel="nofollow" target="_blank"
-                        v-bind:href="comment.website" 
-                        v-bind:style="comment.website? 'cursor: pointer;':'cursor: not-allowed;'"
+                    <a class="va-nick va-text" rel="nofollow" 
+                        v-bind:target="comment.website? '_blank':''"
+                        v-bind:href="comment.website? comment.website:'javascript:void(0)'" 
+                        v-bind:class="comment.website? 'va-nick-with-link':''"
                     >{{comment.nick}}</a>
 
                     <span class="badge badge-pill badge-info" style="margin: 0;"
@@ -20,7 +23,7 @@
                     </span>
 
                     <span class="va-browser va-text">{{comment.browser}}</span>
-                    <span class="va-os va-text">{{comment.os}}</span>
+                    <span class="va-os va-text" v-if="false">{{comment.os}}</span>
                 </div>
 
                 <div class="va-comment-more-info">
@@ -81,9 +84,14 @@
 
     .va-nick {
         transition: all 0.2s;
+        cursor: unset;
         color: #1abc9c;
     }
-    .va-nick:hover {
+    
+    .va-nick-with-link {
+        cursor: pointer;
+    }
+    .va-nick-with-link:hover {
         color: #d7191a;
     }
 
