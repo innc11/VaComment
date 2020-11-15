@@ -20,7 +20,7 @@
         
         <div class="va-action-bar">
             <div class="va-30 va-status-bar">
-                <button type="button" class="va-common-button" v-on:click="previewVisible = !previewVisible">Markdown</button>
+                <button type="button" class="va-common-button" v-on:click="previewVisible = !previewVisible">预览</button>
                 <button type="button" class="va-common-button" v-if="false" v-on:click="smiliesVisible = !smiliesVisible">表情</button>
             </div>
             <div class="va-70 va-tools-bar">
@@ -78,12 +78,12 @@
         text-align: center;
     }
     .va-30 {
-        width: 30%;
+        width: 25%;
         min-width: 160px;
     }
 
     .va-70 {
-        width: 70%;
+        width: 75%;
         min-width: 240px;
     }
 
@@ -104,12 +104,12 @@
     }
 
     .n-m-w {
-        min-width: 130px;
+        min-width: 160px;
         width: 33.33%;
         border-bottom: 1px dashed #dedede;
     }
     .n-m-w:focus {
-        border-bottom-color: #eb5055;
+        border-bottom-color: #e97276;
     }
 
     #va-comment-editor {
@@ -120,7 +120,7 @@
         background: transparent;
         resize: vertical;
         transition: all .25s ease;
-        border: 1px solid #2b805094;
+        border: 1px solid #2b805054;
     }
 
     .va-edit-panel {
@@ -169,12 +169,11 @@
         border-radius: 5px;
         border: 1px dashed #dedede;
         min-width: unset;
-        flex-grow: 1;
-        flex-shrink: 1;
         padding-top: 0px;
         padding-bottom: 0px;
         font-size: 1.3rem;
         font-family: var(--va-monospace);
+        width: 80px;
     }
 
 </style>
@@ -251,7 +250,7 @@ export default Vue.extend({
             this.captchaUrl = ''
             setTimeout(() => {
                 this.captchaUrl = url
-            }, 300)
+            }, 5)
         },
         hideAlert: function () {
             this.alertMessage.text = ''
@@ -287,7 +286,7 @@ export default Vue.extend({
         },
         editorPlaceholder: {
             type: String,
-            default: '还有什么要补充的嘛？'
+            default: '评论支持使用MD语法（留下邮箱可以收到回复提醒）'
         },
         nickPlaceholder: {
             type: String,
@@ -295,11 +294,11 @@ export default Vue.extend({
         },
         mailPlaceholder: {
             type: String,
-            default: '邮箱(会被保密)'
+            default: '邮箱(会被保密/可选)'
         },
         websitePlaceholder: {
             type: String,
-            default: '网站(https://)'
+            default: '网站(可选)'
         },
     }
 })
