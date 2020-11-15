@@ -19,6 +19,8 @@ export default class Valine
     // title: string, id='va-comment-widget', apiUrl='http://127.0.0.1:600'
     constructor(config: any)
     {
+        if (!config)
+            throw new MissingNecessaryFieldError('setting parameter object')
         if (!config.title)
             throw new MissingNecessaryFieldError('title')
         this.title = config.title
@@ -56,10 +58,7 @@ export default class Valine
 
         this.loadCookies()
         
-        this.index.isLoading = true // 加载动画
-        setTimeout(() => {
-            this.refresh()
-        }, 100);
+        this.refresh()
     }
 
     lookupVueComponent(componentName: string)
@@ -100,6 +99,7 @@ export default class Valine
 
     refresh()
     {
+        // 打开加载动画s
         this.index.isLoading = true
 
         fetch(this.apiUrl+'?url='+location.pathname+'&pagination='+this.paginator.current+'&title='+this.title, {
@@ -197,7 +197,11 @@ export default class Valine
 
                     this.storageCookies()
                 }
+                // 刷新验证码
                 this.editor.refreshCaptcha()
+                
+                // 刷新评论
+                this.refresh()
             }
         })
     }
