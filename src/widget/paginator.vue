@@ -56,7 +56,7 @@ export default Vue.extend({
     }
 
     .va-pagin:hover {
-        transform: translateY(-8px);
+        transform: translateY(-4px);
     }
 
     .va-pagin {
@@ -66,7 +66,7 @@ export default Vue.extend({
     .va-paginator .active {
         z-index: auto;
         border-color: transparent;
-        background-color: #ff94a8;
+        background-color: #ffa3b4;
     }
 
     .va-pagin {
