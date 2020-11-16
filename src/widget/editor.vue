@@ -286,19 +286,19 @@ export default Vue.extend({
         },
         editorPlaceholder: {
             type: String,
-            default: '评论支持使用MD语法（留下邮箱可以收到回复提醒）'
+            default: '支持使用Markdown'
         },
         nickPlaceholder: {
             type: String,
-            default: '昵称'
+            default: '*昵称'
         },
         mailPlaceholder: {
             type: String,
-            default: '邮箱(会被保密/可选)'
+            default: '邮箱(会被保密)'
         },
         websitePlaceholder: {
             type: String,
-            default: '网站(可选)'
+            default: '网站'
         },
     }
 })
