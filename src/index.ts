@@ -191,6 +191,8 @@ export default class Valine
                 } else {
                     this.editor.formData.content = ''
 
+                    this.editor.$emit('cancel-reply')
+
                     if (process.env.NODE_ENV === 'production') {
                         this.editor.showAlert('已发布!如果不能正常显示请尝试刷新一下')
                     }
