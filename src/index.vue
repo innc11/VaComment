@@ -34,6 +34,7 @@
         --va-text: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Lato, Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
         --va-monospace: Consolas, 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
+
     body {
         color: #555;
     }
@@ -81,6 +82,9 @@
     }
     .va-common-button:hover {
         background-color: yellowgreen;
+    }
+    .va-common-button:focus {
+        outline: none;
     }
 
     .va-markdown img{

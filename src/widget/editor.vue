@@ -1,55 +1,55 @@
 <template>
-    <div class="va-edit-panel">
+    <div class="va-editor-widget">
         <div class="va-cancel-reply va-text va-common-button" title="取消回复" 
             v-show="isReplying" 
             v-on:click="$emit('cancel-reply')"
         >取消回复</div>
 
         <div class="va-nick-mail-website">
-            <input name="nick" v-bind:placeholder="nickPlaceholder" type="text" class="va-input n-m-w" v-model="formData.nick">
-            <input name="mail" v-bind:placeholder="mailPlaceholder" type="email" class="va-input n-m-w" v-model="formData.mail">
-            <input name="website" v-bind:placeholder="websitePlaceholder" type="text" class="va-input n-m-w" v-model="formData.website">
+            <input name="nick" v-bind:placeholder="nickPlaceholder" type="text" class="va-input-field n-m-w" v-model="formData.nick">
+            <input name="mail" v-bind:placeholder="mailPlaceholder" type="email" class="va-input-field n-m-w" v-model="formData.mail">
+            <input name="website" v-bind:placeholder="websitePlaceholder" type="text" class="va-input-field n-m-w" v-model="formData.website">
         </div>
         
         <textarea id="va-comment-editor" 
             v-bind:placeholder="editorPlaceholder" 
             v-bind:default-placeholder="editorPlaceholder" 
-            class="va-input va-text" 
+            class="va-input-field va-text" 
             v-model="formData.content"
         ></textarea>
         
-        <div class="va-action-bar">
-            <div class="va-30 va-status-bar">
+        <div class="va-panel-main">
+            <div class="va-status-bar">
                 <button type="button" class="va-common-button" v-on:click="previewVisible = !previewVisible">预览</button>
                 <button type="button" class="va-common-button" v-if="false" v-on:click="smiliesVisible = !smiliesVisible">表情</button>
             </div>
-            <div class="va-70 va-tools-bar">
+            <div class="va-tools-bar">
                 <div class="va-captcha">
-                    <input type="text" class="va-input n-m-w va-captcha-field" placeholder="验证码" v-model="formData.captcha">
+                    <input type="text" class="va-input-field" placeholder="验证码" v-model="formData.captcha">
                     <img v-bind:src="captchaUrl" v-on:click="refreshCaptcha"></img>
                 </div>
                 <button type="button" class="va-common-button" v-on:click="onComment">提交</button>
             </div>
         </div>
 
-        <div class="va-smilies" v-show="smiliesVisible">表情面板</div>
-        <div class="va-preview" v-show="previewVisible">
-            <div class="va-preview-tip" style="text-align: center;">Markdown 预览</div>
-            <div class="va-preview-content va-markdown" v-html="formData.content? parseMarkdown(formData.content):''"></div>
+        <div class="va-panel-smilies" v-show="smiliesVisible">表情面板</div>
+        <div class="va-panel-preview" v-show="previewVisible">
+            <div class="va-panel-preview-tip" style="text-align: center;">Markdown 预览</div>
+            <div class="va-panel-preview-content va-markdown" v-html="formData.content? parseMarkdown(formData.content):''"></div>
         </div>
 
         <div class="va-alert" v-show="alertMessage.text!=''">
             <div class="va-alert-h">
                 <div class="va-alert-text va-text" v-html="alertMessage.text"></div>
                 <button type="button" class="va-common-button" v-on:click="hideAlert">{{alertMessage.button}}</button>
-
-                <div class="va-alert-button"></div>
             </div>
         </div>
     </div>
 </template>
 
-<style>
+<style lang="scss">
+
+    // 警告面板
     .va-alert {
         position: absolute;
         width: 100%;
@@ -58,42 +58,44 @@
         display: flex;
         align-items: center;
         flex-direction: column;
-        background-color: rgba(77, 77, 77, 0.76);
-    }
+        background-color: #4d4d4dc2;
 
-    .va-alert * {
-        color: rgb(236, 233, 231) !important;
-    }
+        .va-alert-h {
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            margin: auto 0px;
 
-    .va-alert-h {
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-        margin: auto 0px;
-    }
+            .va-alert-text {
+                font-size: 1.3rem;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+        }
 
-    .va-alert-text.va-text {
-        font-size: 1.3rem;
-        margin-bottom: 1rem;
-        text-align: center;
-    }
-    .va-30 {
-        width: 25%;
-        min-width: 160px;
-    }
-
-    .va-70 {
-        width: 75%;
-        min-width: 240px;
+        * {
+            color: #ece9e7 !important;
+        }
     }
 
     .va-nick-mail-website {
         display: flex;
         flex-wrap: wrap;
         line-height: 1.75;
+
+        > input {
+            min-width: 160px;
+            width: 33.33%;
+            border-bottom: 1px dashed #dedede;
+            border-radius: 0px;
+        }
+        > input:focus {
+            border-bottom-color: #e97276;
+        }
     }
 
-    .va-input {
+    // 可输入字段
+    .va-input-field {
         border: none;
         resize: none;
         outline: none;
@@ -101,29 +103,23 @@
         max-width: 100%;
         font-size: .875em;
         box-sizing: border-box;
+        border-radius: 0px;
     }
 
-    .n-m-w {
-        min-width: 160px;
-        width: 33.33%;
-        border-bottom: 1px dashed #dedede;
-    }
-    .n-m-w:focus {
-        border-bottom-color: #e97276;
-    }
-
+    // 输入框
     #va-comment-editor {
         width: 100%;
         min-height: 8.75em;
-        font-size: .875em;
+        font-size: 0.875em;
         margin-top: 0.5rem;
         background: transparent;
         resize: vertical;
         transition: all .25s ease;
-        border: 1px solid #2b805054;
+        border: 1px solid #2b805031;
     }
 
-    .va-edit-panel {
+    // 整个编辑器组件
+    .va-editor-widget {
         border: 1px solid #f0f0f0;
         border-radius: 4px;
         margin-bottom: 10px;
@@ -132,51 +128,62 @@
         padding: 10px;
     }
 
-    .va-action-bar {
+    // 主面板（预览/验证码/提交按钮等）
+    .va-panel-main {
         display: flex;
         flex-wrap: wrap;
+
+        .va-status-bar {
+            width: 25%;
+            min-width: 160px;
+        }
+
+        .va-tools-bar {
+            width: 75%;
+            min-width: 240px;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-end;
+        }
     }
 
-    .va-tools-bar {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-end;
-    }
-
+    // 取消回复按钮
     .va-cancel-reply.va-common-button {
         width: 100%;
         background-color: #73ff2b2b;
     }
 
-    .va-preview-content {
+    // 预览框
+    .va-panel-preview-content {
         border-radius: 5px;
         padding: 5px;
         border: 1px dashed #00000059;
         box-sizing: border-box;
     }
 
+    // 验证码
     .va-captcha {
         display: inline-flex;
         margin: 0px 8px;
         width: 190px;
-    }
 
-    .va-captcha img {
-        cursor: pointer;
-    }
+        img {
+            cursor: pointer;
+        }
 
-    .va-captcha-field {
-        border-radius: 5px;
-        border: 1px dashed #dedede;
-        min-width: unset;
-        padding-top: 0px;
-        padding-bottom: 0px;
-        font-size: 1.3rem;
-        font-family: var(--va-monospace);
-        width: 80px;
+        input {
+            border-bottom: 1px solid#dedede;
+            min-width: unset;
+            padding-top: 0px;
+            padding-bottom: 0px;
+            font-size: 1.3rem;
+            font-family: var(--va-monospace);
+            width: 80px;
+        }
     }
 
 </style>
+
 
 <script lang="ts">
 import Vue from 'vue'
@@ -193,19 +200,19 @@ export default Vue.extend({
         },
         onComment: function () {
             if (!this.formData.content)  {
-                this.showAlert('评论内容不能为空')
+                this.showAlert('写点儿什么吧')
                 return
             }
 
             if (!this.formData.nick) {
-                this.showAlert('昵称不能为空')
+                this.showAlert('如何称呼您呢?')
                 return
             }
 
             if (process.env.NODE_ENV === 'production')
             {
                 if (!this.formData.captcha) {
-                    this.showAlert('需要填写验证码')
+                    this.showAlert('需要填写验证码哦')
                     return
                 }
             }
@@ -215,7 +222,7 @@ export default Vue.extend({
                 let reg = new RegExp('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$', 'g')
                 if (!this.formData.mail.match(reg))
                 {
-                    this.showAlert('邮箱格式不正确')
+                    this.showAlert('邮箱请使用xx@xx.xx格式')
                     return
                 }
             }
@@ -225,7 +232,7 @@ export default Vue.extend({
                 let reg = new RegExp('^https?://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?$', 'g')
                 if (!this.formData.website.match(reg))
                 {
-                    this.showAlert('网站格式不正确(建议使用http://或者https://开头)')
+                    this.showAlert('网站格式请使用http://或者https://开头')
                     return
                 }
             }
@@ -266,7 +273,7 @@ export default Vue.extend({
             },
             alertMessage: {
                 text: '',
-                button: 'OK'
+                button: '好的'
             },
             captchaUrl: '',
             previewVisible: false,
@@ -288,7 +295,7 @@ export default Vue.extend({
         },
         nickPlaceholder: {
             type: String,
-            default: '*昵称'
+            default: '昵称*'
         },
         mailPlaceholder: {
             type: String,

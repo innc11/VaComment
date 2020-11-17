@@ -187,15 +187,15 @@ export default class Valine
                 {
                     console.log('发表评论失败: ')
                     console.log(xhr)
-                    this.editor.showAlert('发表评论失败<br/>原因：'+xhr.responseText+'<br>(通常是验证码不正确)')
+                    this.editor.showAlert('发表评论失败<br/>原因：'+xhr.responseText)
                 } else {
                     this.editor.formData.content = ''
 
                     this.editor.$emit('cancel-reply')
 
-                    if (process.env.NODE_ENV === 'production') {
-                        this.editor.showAlert('已发布!如果不能正常显示请尝试刷新一下')
-                    }
+                    // if (process.env.NODE_ENV === 'production') {
+                    //     this.editor.showAlert('已发布!如果不能正常显示请尝试刷新一下')
+                    // }
 
                     this.storageCookies()
                 }
