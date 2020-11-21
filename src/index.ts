@@ -6,17 +6,18 @@ import { CreateElement } from 'vue/types/umd'
 const cookies = require('brownies')
 const uadetector = require('./userAgentDetector.js')
 const moment = require('moment');
+require('moment/locale/zh-cn');
 
 export default class Valine
 {
     apiUrl = 'http://127.0.0.1:600'
     title: string
+    getTitleCallback: () => string
 
     index: any // Vue实例
     editor: any // Vue实例
     paginator: any // Vue实例
     
-    // title: string, id='va-comment-widget', apiUrl='http://127.0.0.1:600'
     constructor(config: any)
     {
         if (!config)
@@ -32,6 +33,11 @@ export default class Valine
         
         if (config.api_url)
             this.apiUrl = config.api_url
+        
+        if (config.get_title_callback)
+            this.getTitleCallback = config.get_title_callback
+        else
+            this.getTitleCallback = () => location.pathname
 
         // this.index = new Vue({
         //     el: '#'+id,
@@ -56,9 +62,16 @@ export default class Valine
         this.index.owner = this
         this.paginator.owner = this
 
+        if (config.language)
+            this.loadLanguage(config.language)
+
         this.loadCookies()
         
         this.refresh()
+
+        this.smilies()
+
+        moment.locale('zh-cn')
     }
 
     lookupVueComponent(componentName: string)
@@ -70,6 +83,21 @@ export default class Valine
         }
 
         return null
+    }
+
+    loadLanguage(language: any)
+    {
+        if (language.comment)
+            this.editor.editorPlaceholder = language.comment
+
+        if (language.nick)
+            this.editor.nickPlaceholder = language.nick
+
+        if (language.mail)
+            this.editor.mailPlaceholder = language.mail
+
+        if (language.website)
+            this.editor.websitePlaceholder = language.website
     }
 
     checkIfServerSide(): void
@@ -102,13 +130,12 @@ export default class Valine
         // 打开加载动画s
         this.index.isLoading = true
 
-        fetch(this.apiUrl+'?url='+location.pathname+'&pagination='+this.paginator.current+'&title='+this.title, {
-            cache: 'no-cache',
-            credentials: 'include'
-        })
-            .then((response) => 
-                response.json()
-            ).then((json) => {
+        let url = this.apiUrl+'/comment?url='+this.getTitleCallback()+'&pagination='+this.paginator.current+'&title='+this.title
+        $.ajax({
+            url: url,      async:    true,    type: 'GET',
+            cache: false,  dataType: "json",  
+            xhrFields: { withCredentials: true }, // 必须带上cookie
+            success: (json: any) => {
                 function sortfun(obj1: any, obj2: any) {
                     if(obj1.time > obj2.time) return 1
                     if(obj1.time < obj2.time) return -1
@@ -131,7 +158,14 @@ export default class Valine
                             isauthor: comment.isauthor,
                             browser: ua.browser+' '+ua.version,
                             os: ua.os+' '+ua.osVersion,
-                            time: moment(comment.time * 1000).format('YYYY-MM-DD HH:mm'),
+                            time: moment(comment.time * 1000).calendar(null, {
+                                sameDay: '[今天] HH:mm',
+                                nextDay: '[明天] HH:mm',
+                                nextWeek: 'dddd',
+                                lastDay: '[昨天] HH:mm',
+                                lastWeek: 'YYYY-MM-DD HH:mm',
+                                sameElse: 'YYYY-MM-DD HH:mm'
+                            }),
                             content: comment.content,
                             replies: parseData(comment.replies.slice(0).sort(sortfun))
                         })
@@ -150,67 +184,84 @@ export default class Valine
 
                 // 隐藏加载动画
                 this.index.isLoading = false
-            }).catch((e) => {
-                console.log('发生错误: '+e);
+            },
+            error: (xhr: any, status: any, error: any) => {
+                console.log('评论获取失败: ')
+                console.log(xhr)
+                this.editor.showAlert('评论获取失败<br/>原因：'+status)
+
                 this.index.isLoading = false
-            })
+            }
+        })
     }
 
     submit(comment: any)
     {
         comment.parent = this.index.replyId
         comment.title = this.title
-        // fetch(, {
-        //     method: 'POST',
-        //     body: JSON.stringify(comment),
-        //     mode: 'no-cors',
-        //     headers: {
-        //         "Content-Type": "application/json;charset=utf-8"
-        //     },
-        // }).then((data)=>{
-        //     console.log(data)
-        // }).catch((e) => {
-        //     console.log('发生错误: '+e);
-        // })
 
-        let URL = this.apiUrl+'?url='+location.pathname
+        let URL = this.apiUrl+'/comment?url='+this.getTitleCallback()
         $.ajax({
             url: URL,      async:    true,    type: 'POST',
             cache: false,  dataType: "json",  data: JSON.stringify(comment),
-            xhrFields: {
-                withCredentials: true // 必须带上cookie
-            },
-            success: (res: string) => {
+            xhrFields: { withCredentials: true }, // 必须带上cookie
+            success: (res: any) => {
+                this.editor.formData.content = ''
+                this.editor.$emit('cancel-reply')
+                this.storageCookies()
+                this.editor.refreshCaptcha() // 刷新验证码
+                this.refresh() // 刷新评论
             },
             error: (xhr: any, status: any,error: any) => {
                 if (xhr.status!=200)
                 {
                     console.log('发表评论失败: ')
                     console.log(xhr)
-                    this.editor.showAlert('发表评论失败<br/>原因：'+xhr.responseText)
-                } else {
-                    this.editor.formData.content = ''
+                    let reason = xhr.responseJSON.reason
+                    this.editor.showAlert('发表评论失败<br/>原因：'+(reason? reason:xhr.responseText))
+                } 
+            }
+        })
+    }
 
-                    this.editor.$emit('cancel-reply')
+    smilies()
+    {
+        $.ajax({
+            url: this.apiUrl+'/smilie_api',   async:  true,    
+            cache: false,  dataType: "json",  type:  'GET',
+            xhrFields: { withCredentials: true }, // 必须带上cookie
+            success: (res: any) => {
+                for (let sm of res[1]) {
+                    let smilieSet = sm[0]
+                    this.editor.smiliesComponet.smilies[smilieSet] = {}
 
-                    // if (process.env.NODE_ENV === 'production') {
-                    //     this.editor.showAlert('已发布!如果不能正常显示请尝试刷新一下')
-                    // }
-
-                    this.storageCookies()
+                    let url2 = this.apiUrl+'/smilie_api/'+smilieSet
+                    console.log(url2)
+                    $.ajax({
+                        url: url2,   async:  true,    
+                        cache: false,  dataType: "json",  type:  'GET',
+                        xhrFields: { withCredentials: true }, // 必须带上cookie
+                        success: (res2: any) => {
+                            for (let sm2 of res2[1]) {
+                                let smiliesName = sm2;
+                                this.editor.smiliesComponet.smilies[smilieSet][smiliesName] = res2[0]+smilieSet+'/'+smiliesName
+                                this.editor.smiliesComponet.$forceUpdate()
+                                this.editor.smiliesComponet.defaultSmilieSet()
+                            }
+                        }
+                    })
                 }
-                // 刷新验证码
-                this.editor.refreshCaptcha()
-                
-                // 刷新评论
-                this.refresh()
+            },
+            error: (xhr: any, status: any,error: any) => {
+                    console.log('获取表情失败: ')
+                    console.log(xhr)
             }
         })
     }
 
     getCaptchaAPI()
     {
-        return this.apiUrl+'/captcha.php'
+        return this.apiUrl+'/captcha'
     }
 
     static version()

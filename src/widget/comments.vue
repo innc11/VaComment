@@ -16,7 +16,7 @@
                         v-bind:class="comment.website? 'va-nick-with-link':''"
                     >{{comment.nick}}</a>
 
-                    <span class="badge badge-pill badge-info" style="margin: 0;"
+                    <span class="va-badge-author" style="margin: 0;"
                         v-if="comment.isauthor"
                     >
                         <i class="fa fa-user-o" aria-hidden="true" style="display: none"></i>作者
@@ -125,6 +125,21 @@
     .va-comment-replies {
         border-left: 1px dashed #00000000;
         /* border-left: 1px dashed #c2c2c280; */
+    }
+
+    .va-badge-author {
+        color: #03acca;
+        background-color: #c3f3fb;
+        border-radius: 8px;
+        padding: 0.5em;
+        text-align: center;
+        vertical-align: baseline;
+        white-space: nowrap;
+        font-size: 66%;
+        font-weight: 600;
+        line-height: 1;
+        display: inline-block;
+        box-sizing: border-box;
     }
 
 </style>

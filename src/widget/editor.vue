@@ -21,7 +21,7 @@
         <div class="va-panel-main">
             <div class="va-status-bar">
                 <button type="button" class="va-common-button" v-on:click="previewVisible = !previewVisible">预览</button>
-                <button type="button" class="va-common-button" v-if="false" v-on:click="smiliesVisible = !smiliesVisible">表情</button>
+                <button type="button" class="va-common-button" v-if="true" v-on:click="smiliesVisible = !smiliesVisible">表情</button>
             </div>
             <div class="va-tools-bar">
                 <div class="va-captcha">
@@ -32,10 +32,15 @@
             </div>
         </div>
 
-        <div class="va-panel-smilies" v-show="smiliesVisible">表情面板</div>
+        <div class="va-panel-smilies" v-show="smiliesVisible">
+            <div>表情</div>
+            <div class="va-panel-extended">
+                <smilies-comment></smilies-comment>
+            </div>
+        </div>
         <div class="va-panel-preview" v-show="previewVisible">
-            <div class="va-panel-preview-tip" style="text-align: center;">Markdown 预览</div>
-            <div class="va-panel-preview-content va-markdown" v-html="formData.content? parseMarkdown(formData.content):''"></div>
+            <div>预览</div>
+            <div class="va-panel-extended va-markdown" v-html="formData.content? parseMarkdown(formData.content):''"></div>
         </div>
 
         <div class="va-alert" v-show="alertMessage.text!=''">
@@ -47,8 +52,147 @@
     </div>
 </template>
 
-<style lang="scss">
+<script lang="ts">
+import Vue from 'vue'
+import Valine from '..'
+import smiliesComponet from './smilies.vue'
+import marked2 from '../markedLib'
+import inserfunc from '../utils/jq-insert.js'
 
+export default Vue.extend({
+    mounted: function() {
+        setTimeout(() => this.captchaUrl = this.owner.getCaptchaAPI(), 10)
+        inserfunc()
+
+        this.smiliesComponet = this.$children[0]
+    },
+    methods: {
+        parseMarkdown: function (text) {
+            // 解析表情
+            for(let k in this.smiliesComponet.smilies)
+            {
+                let sms = this.smiliesComponet.smilies[k]
+                for(let sm in sms)
+                {
+                    let url = sms[sm]
+                    let el = '<img class="smilie" src="'+url+'" alt="'+sm+'" style="max-width:84px !important;max-height: 84px !important;display:inline-block;"/>';
+                    text = text.replace(':'+sm+':', el)
+                }
+            }
+            return marked2(text)
+        },
+        onComment: function () {
+            if (!this.formData.content)  {
+                this.showAlert('写点儿什么吧')
+                return
+            }
+
+            if (!this.formData.nick) {
+                this.showAlert('如何称呼您呢?')
+                return
+            }
+
+            if (process.env.NODE_ENV === 'production')
+            {
+                if (!this.formData.captcha) {
+                    this.showAlert('需要填写验证码哦')
+                    return
+                }
+            }
+
+            if (this.formData.mail)
+            {
+                let reg = new RegExp('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$', 'g')
+                if (!this.formData.mail.match(reg))
+                {
+                    this.showAlert('邮箱请使用xx@xx.xx格式')
+                    return
+                }
+            }
+
+            if (this.formData.website)
+            {
+                let reg = new RegExp('^https?://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?$', 'g')
+                if (!this.formData.website.match(reg))
+                {
+                    this.showAlert('网站格式请使用http://或者https://开头')
+                    return
+                }
+            }
+
+            this.owner.submit({
+                url: location.pathname,
+                nick: this.formData.nick,
+                mail: this.formData.mail,
+                website: this.formData.website,
+                content: this.formData.content,
+                parent: -1,
+                captcha: this.formData.captcha,
+            })
+
+            this.owner.refresh()
+        },
+        refreshCaptcha: function (e) {
+            this.formData.captcha = ''
+            let url = this.captchaUrl
+            this.captchaUrl = ''
+            setTimeout(() => {
+                this.captchaUrl = url
+            }, 5)
+        },
+        hideAlert: function () {
+            this.alertMessage.text = ''
+        },
+        showAlert: function (message, button='OK') {
+            this.alertMessage.text = message
+        }
+    },
+    data: () => {
+        return {
+            editorPlaceholder: '说点儿什么吧',
+            nickPlaceholder: '昵称',
+            mailPlaceholder: '邮箱',
+            websitePlaceholder: '网站',
+
+            smiliesComponet: null,
+            formData: {
+                nick: '', mail: '',
+                website: '', content: '',
+                captcha: ''
+            },
+            alertMessage: {
+                text: '',
+                button: '好的'
+            },
+            captchaUrl: '',
+            previewVisible: false,
+            smiliesVisible: false,
+        }
+    },
+    watch: {
+        smiliesVisible: function(newV, oldV)
+        {
+            this.previewVisible = newV
+        }
+    },
+    props: {
+        owner: {
+            type: Valine,
+            required: true
+        },
+        isReplying: {
+            type: Boolean,
+            required: true
+        }
+    },
+    components: {
+        'smilies-comment': smiliesComponet,
+    }
+})
+</script>
+
+
+<style lang="scss">
     // 警告面板
     .va-alert {
         position: absolute;
@@ -153,10 +297,9 @@
         background-color: #73ff2b2b;
     }
 
-    // 预览框
-    .va-panel-preview-content {
-        border-radius: 5px;
-        padding: 5px;
+    // 扩展的面板
+    .va-panel-extended {
+        padding: 0px 8px;
         border: 1px dashed #00000059;
         box-sizing: border-box;
     }
@@ -183,129 +326,3 @@
     }
 
 </style>
-
-
-<script lang="ts">
-import Vue from 'vue'
-import Valine from '..'
-import marked2 from '../markedLib'
-
-export default Vue.extend({
-    mounted: function() {
-        setTimeout(() => this.captchaUrl = this.owner.getCaptchaAPI(), 10)
-    },
-    methods: {
-        parseMarkdown: function (text) {
-            return marked2(text)
-        },
-        onComment: function () {
-            if (!this.formData.content)  {
-                this.showAlert('写点儿什么吧')
-                return
-            }
-
-            if (!this.formData.nick) {
-                this.showAlert('如何称呼您呢?')
-                return
-            }
-
-            if (process.env.NODE_ENV === 'production')
-            {
-                if (!this.formData.captcha) {
-                    this.showAlert('需要填写验证码哦')
-                    return
-                }
-            }
-
-            if (this.formData.mail)
-            {
-                let reg = new RegExp('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$', 'g')
-                if (!this.formData.mail.match(reg))
-                {
-                    this.showAlert('邮箱请使用xx@xx.xx格式')
-                    return
-                }
-            }
-
-            if (this.formData.website)
-            {
-                let reg = new RegExp('^https?://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?$', 'g')
-                if (!this.formData.website.match(reg))
-                {
-                    this.showAlert('网站格式请使用http://或者https://开头')
-                    return
-                }
-            }
-
-            this.owner.submit({
-                url: location.pathname,
-                nick: this.formData.nick,
-                mail: this.formData.mail,
-                website: this.formData.website,
-                content: this.formData.content,
-                parent: -1,
-                captcha: this.formData.captcha,
-            })
-
-            this.owner.refresh()
-        },
-        refreshCaptcha: function (e) {
-            this.formData.captcha = ''
-            let url = this.captchaUrl
-            this.captchaUrl = ''
-            setTimeout(() => {
-                this.captchaUrl = url
-            }, 5)
-        },
-        hideAlert: function () {
-            this.alertMessage.text = ''
-        },
-        showAlert: function (message, button='OK') {
-            this.alertMessage.text = message
-        }
-    },
-    data: () => {
-        return {
-            formData: {
-                nick: '', mail: '',
-                website: '', content: '',
-                captcha: ''
-            },
-            alertMessage: {
-                text: '',
-                button: '好的'
-            },
-            captchaUrl: '',
-            previewVisible: false,
-            smiliesVisible: false
-        }
-    },
-    props: {
-        owner: {
-            type: Valine,
-            required: true
-        },
-        isReplying: {
-            type: Boolean,
-            required: true
-        },
-        editorPlaceholder: {
-            type: String,
-            default: '还有什么要补充的吗?'
-        },
-        nickPlaceholder: {
-            type: String,
-            default: '昵称*'
-        },
-        mailPlaceholder: {
-            type: String,
-            default: '邮箱(会被保密)'
-        },
-        websitePlaceholder: {
-            type: String,
-            default: '网站'
-        },
-    }
-})
-</script>
-
