@@ -216,7 +216,8 @@ export default class Valine
             cache: false,  dataType: "json",  type:  'GET',
             xhrFields: { withCredentials: true }, // 必须带上cookie
             success: (res: any) => {
-                for (let sm of res[1]) {
+                let allSmilieSets = res[1]
+                for (let sm of allSmilieSets) {
                     let smilieSet = sm[0]
                     this.editor.smiliesComponet.smilies[smilieSet] = {}
 
@@ -227,9 +228,11 @@ export default class Valine
                         cache: false,  dataType: "json",  type:  'GET',
                         xhrFields: { withCredentials: true }, // 必须带上cookie
                         success: (res2: any) => {
-                            for (let sm2 of res2[1]) {
+                            let urlHeader = res2[0]
+                            let allSmilies = res2[1]
+                            for (let sm2 of allSmilies) {
                                 let smiliesName = sm2;
-                                this.editor.smiliesComponet.smilies[smilieSet][smiliesName] = res2[0]+smilieSet+'/'+smiliesName
+                                this.editor.smiliesComponet.smilies[smilieSet][smiliesName] = urlHeader+smilieSet+'/'+smiliesName
                                 this.editor.smiliesComponet.$forceUpdate()
                                 this.editor.smiliesComponet.defaultSmilieSet()
                             }
