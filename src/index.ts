@@ -4,7 +4,7 @@ import { MissingNecessaryFieldError, ServerSideError } from "./exception"
 import indexvue from './index.vue'
 import { CreateElement } from 'vue/types/umd'
 const cookies = require('brownies')
-const uadetector = require('./userAgentDetector.js')
+const uaparser = require('ua-parser-js');
 const moment = require('moment');
 require('moment/locale/zh-cn');
 
@@ -38,18 +38,6 @@ export default class Valine
             this.getTitleCallback = config.get_title_callback
         else
             this.getTitleCallback = () => location.pathname
-
-        // this.index = new Vue({
-        //     el: '#'+id,
-        //     components: {
-        //         'va-comment-widget': comment
-        //     },
-        //     // props: {
-        //     //     owner: {
-        //     //         default: () => this
-        //     //     }
-        //     // }
-        // }).$children[0]
 
         this.index = new Vue({
             el: '#'+id,
@@ -148,16 +136,13 @@ export default class Valine
 
                     for (let comment of comments)
                     {
-                        let ua = uadetector(comment.useragent)
-    
                         allcomments.push({
                             id: comment.id,
                             avatar: comment.avatar,
                             nick: comment.nick,
                             website: comment.website,
                             isauthor: comment.isauthor,
-                            browser: ua.browser+' '+ua.version,
-                            os: ua.os+' '+ua.osVersion,
+                            ua: uaparser(comment.useragent),
                             time: moment(comment.time * 1000).calendar(null, {
                                 sameDay: '[今天] HH:mm',
                                 nextDay: '[明天] HH:mm',

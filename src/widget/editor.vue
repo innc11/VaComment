@@ -284,7 +284,6 @@ export default Vue.extend({
 
         .va-tools-bar {
             width: 75%;
-            min-width: 240px;
             display: flex;
             flex-direction: row;
             justify-content: flex-end;
@@ -308,7 +307,6 @@ export default Vue.extend({
     .va-captcha {
         display: inline-flex;
         margin: 0px 8px;
-        width: 190px;
 
         img {
             cursor: pointer;

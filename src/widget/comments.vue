@@ -16,14 +16,10 @@
                         v-bind:class="comment.website? 'va-nick-with-link':''"
                     >{{comment.nick}}</a>
 
-                    <span class="va-badge-author" style="margin: 0;"
-                        v-if="comment.isauthor"
-                    >
-                        <i class="fa fa-user-o" aria-hidden="true" style="display: none"></i>作者
-                    </span>
+                    <span class="va-badge-author" style="margin: 0;" v-if="comment.isauthor">作者</span>
 
-                    <span class="va-browser va-text">{{comment.browser}}</span>
-                    <span class="va-os va-text" v-if="false">{{comment.os}}</span>
+                    <span class="va-browser va-text">{{comment.ua.browser.name+' '+comment.ua.browser.version}}</span>
+                    <span class="va-os va-text" v-if="false">{{comment.ua.os.name+' '+comment.ua.os.version}}</span>
                 </div>
 
                 <div class="va-comment-more-info">
@@ -86,6 +82,7 @@
         transition: all 0.2s;
         cursor: unset;
         color: #1abc9c;
+        font-size: 1em !important;
     }
     
     .va-nick-with-link {

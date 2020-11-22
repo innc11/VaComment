@@ -107,6 +107,10 @@
         animation: spin 2s infinite linear;
     }
 
+    .va-all-comments {
+        padding: 0.5rem;
+    }
+
     @keyframes spin
     {
         from { transform: rotate(0deg); }
@@ -139,8 +143,10 @@ export default Vue.extend({
         onClickReply: function(e) {
             this.isReplying = true
 
+            console.log('reply button')
+
             let cid = $(e.target).attr('comment-id')
-            let edit = $('.va-edit-panel')
+            let edit = $('.va-editor-widget')
             let corespondingWrapper = $('.va-comment-container[comment-id="'+cid+'"]>.va-comment-reply-wrapper')
             edit.appendTo(corespondingWrapper)
             $('.va-cancel-reply').css('display', '')
@@ -155,7 +161,9 @@ export default Vue.extend({
         onCancelReply: function() {
             this.isReplying = false
 
-            let edit = $('.va-edit-panel')
+            console.log('cancel reply button')
+
+            let edit = $('.va-editor-widget')
             let defaultWrapper = $('.va-default-wrapper')
             $('.va-cancel-reply').css('display', 'none')
             edit.appendTo(defaultWrapper)
