@@ -260,6 +260,7 @@ export default Vue.extend({
         resize: vertical;
         transition: all .25s ease;
         border: 1px solid #2b805031;
+        word-break: break-all;
     }
 
     // 整个编辑器组件
