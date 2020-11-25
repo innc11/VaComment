@@ -11,6 +11,9 @@ jobs:
       token: ${{ secrets.TOKEN }}
       branch: pages
     steps:
+      - name: Prepare
+        run: sudo timedatectl set-timezone 'Asia/Shanghai'
+        
       - name: Checkout
         uses: actions/checkout@v2
 
