@@ -8,7 +8,7 @@ const uaparser = require('ua-parser-js');
 const moment = require('moment');
 require('moment/locale/zh-cn');
 
-export default class Valine
+export default class Valinear
 {
     apiUrl = 'http://127.0.0.1:600'
     title: string
@@ -21,7 +21,7 @@ export default class Valine
     constructor(config: any)
     {
         if (!config)
-            throw new MissingNecessaryFieldError('setting parameter object')
+            throw new MissingNecessaryFieldError('setting-parameter-object')
         if (!config.title)
             throw new MissingNecessaryFieldError('title')
         this.title = config.title
@@ -264,4 +264,4 @@ export default class Valine
 }
 
 // 注册到全局变量
-window.Valine = Valine
+window.Valinear = Valinear
