@@ -11,6 +11,9 @@ jobs:
       token: ${{ secrets.TOKEN }}
       branch: pages
     steps:
+      - name: Prepare
+        run: sudo timedatectl set-timezone 'Asia/Shanghai'
+        
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -29,6 +32,7 @@ jobs:
           
       - name: Depoly
         run: |
+          export datatime=`date +"%b %d, %Y %H:%M:%S"`
           cd dist
           git init
           git config user.email innc11@163.com
@@ -37,7 +41,7 @@ jobs:
           git remote add github https://$token@github.com/$GITHUB_REPOSITORY
           git checkout -b $branch
           git add --all
-          git commit -m "Auto deploy from Github Actinos #$GITHUB_RUN_NUMBER"
+          git commit -m "Auto deploy from Github Actinos #$GITHUB_RUN_NUMBER on $datatime"
           git push github $branch --force
           echo "Successfully deployed!"
           echo "See: https://github.com/$GITHUB_REPOSITORY/tree/$branch"
