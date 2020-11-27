@@ -8,7 +8,7 @@ const uaparser = require('ua-parser-js');
 const moment = require('moment');
 require('moment/locale/zh-cn');
 
-export default class Valinear
+export default class VaComment
 {
     apiUrl = 'http://127.0.0.1:600'
     title: string
@@ -222,7 +222,7 @@ export default class Valinear
                     this.editor.smiliesComponet.smilies[smilieSet] = {}
 
                     let url2 = this.apiUrl+'/smilie_api/'+smilieSet
-                    console.log(url2)
+                    // console.log(url2)
                     $.ajax({
                         url: url2,   async:  true,    
                         cache: false,  dataType: "json",  type:  'GET',
@@ -264,4 +264,4 @@ export default class Valinear
 }
 
 // 注册到全局变量
-window.Valinear = Valinear
+window.VaComment = VaComment
