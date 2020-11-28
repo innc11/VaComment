@@ -941,7 +941,7 @@
 
 "@types/jquery@^3.5.4":
   version "3.5.4"
-  resolved "https://registry.npm.taobao.org/@types/jquery/download/@types/jquery-3.5.4.tgz?cache=0&sync_timestamp=1603912484912&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fjquery%2Fdownload%2F%40types%2Fjquery-3.5.4.tgz#e923f7d05ca790530f17f80a3b89bc28853fa17f"
+  resolved "https://registry.npm.taobao.org/@types/jquery/download/@types/jquery-3.5.4.tgz#e923f7d05ca790530f17f80a3b89bc28853fa17f"
   integrity sha1-6SP30FynkFMPF/gKO4m8KIU/oX8=
   dependencies:
     "@types/sizzle" "*"
@@ -1157,11 +1157,6 @@ atob@^2.1.2:
   resolved "https://registry.npm.taobao.org/atob/download/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha1-bZUX654DDSQ2ZmZR6GvZ9vE1M8k=
 
-autosize@^4.0.2:
-  version "4.0.2"
-  resolved "https://registry.npm.taobao.org/autosize/download/autosize-4.0.2.tgz#073cfd07c8bf45da4b9fd153437f5bafbba1e4c9"
-  integrity sha1-Bzz9B8i/RdpLn9FTQ39br7uh5Mk=
-
 aws-sign2@~0.7.0:
   version "0.7.0"
   resolved "https://registry.npm.taobao.org/aws-sign2/download/aws-sign2-0.7.0.tgz#b46e890934a9591f2d2f6f86d7e6a9f1b3fe76a8"
@@ -1326,8 +1321,8 @@ brorand@^1.0.1:
 
 brownies@^3.0.0:
   version "3.0.0"
-  resolved "https://registry.npm.taobao.org/brownies/download/brownies-3.0.0.tgz#ec3952ae51077281743ea70f1cef37c59a023ba5"
-  integrity sha1-7DlSrlEHcoF0PqcPHO83xZoCO6U=
+  resolved "https://registry.yarnpkg.com/brownies/-/brownies-3.0.0.tgz#ec3952ae51077281743ea70f1cef37c59a023ba5"
+  integrity sha512-kVyGuOrr6LMspa+Mcb9RED6d33oZzJZ6ys020hxnYgoj4MCLz9mTbpL5m1tAjk+jhK3vQ1h+ftd93z6miG+AXw==
 
 browser-process-hrtime@^1.0.0:
   version "1.0.0"
@@ -3159,6 +3154,11 @@ isstream@~0.1.2:
   version "0.1.2"
   resolved "https://registry.npm.taobao.org/isstream/download/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
+
+jquery@^3.5.1:
+  version "3.5.1"
+  resolved "https://registry.npm.taobao.org/jquery/download/jquery-3.5.1.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fjquery%2Fdownload%2Fjquery-3.5.1.tgz#d7b4d08e1bfdb86ad2f1a3d039ea17304717abb5"
+  integrity sha1-17TQjhv9uGrS8aPQOeoXMEcXq7U=
 
 js-tokens@^4.0.0:
   version "4.0.0"

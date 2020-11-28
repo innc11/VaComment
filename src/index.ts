@@ -1,8 +1,8 @@
-
 import Vue from 'vue'
 import { MissingNecessaryFieldError, ServerSideError } from "./exception"
-import indexvue from './index.vue'
+import indexvue from './vaComment.vue'
 import { CreateElement } from 'vue/types/umd'
+const $ = require('jquery')
 const cookies = require('brownies')
 const uaparser = require('ua-parser-js');
 const moment = require('moment');
@@ -113,6 +113,7 @@ export default class VaComment
         cookies.cookies.va_website = this.editor.formData.website
     }
 
+    // 获取评论
     refresh()
     {
         // 打开加载动画s
@@ -180,6 +181,7 @@ export default class VaComment
         })
     }
 
+    // 提交评论
     submit(comment: any)
     {
         comment.parent = this.index.replyId
@@ -209,6 +211,7 @@ export default class VaComment
         })
     }
 
+    // 获取表情
     smilies()
     {
         $.ajax({

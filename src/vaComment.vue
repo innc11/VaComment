@@ -25,9 +25,82 @@
             正在加载
         </div>
 
-        <va-paginator></va-paginator>
+        <va-paginator
+            v-on:pagination-changed="onPaginationChanged"
+        ></va-paginator>
     </div>
 </template>
+
+<script lang="ts">
+import Vue from 'vue'
+import CommentModel from './commentModel'
+import comments from './widget/comments.vue'
+import editor from './widget/editor.vue'
+import paginator from './widget/paginator.vue'
+const $ = require('jquery')
+
+export default Vue.extend({
+    name: 'comment-widget',
+    inheritAttrs: false,
+    data: () => {
+        return {
+            owner: null,
+            allComments: [],
+            commentCount: 0,
+            isReplying: false,
+            isLoading: false,
+            replyId: -1
+        }
+    },
+    methods: {
+        onClickReply: function(e) {
+            this.isReplying = true
+
+            let cid = $(e.target).attr('comment-id')
+            let edit = $('.va-editor-widget')
+            let corespondingWrapper = $('.va-comment-container[comment-id="'+cid+'"]>.va-comment-reply-wrapper')
+            edit.appendTo(corespondingWrapper)
+            $('.va-cancel-reply').css('display', '')
+
+            let object = $('.va-comment-container[comment-id="'+cid+'"] .va-nick').text()
+            let input = $('#va-comment-editor')
+            input.attr('placeholder', '@ '+object+',')
+            input.focus()
+
+            this.replyId = cid
+        },
+        onCancelReply: function() {
+            this.isReplying = false
+
+            let edit = $('.va-editor-widget')
+            let defaultWrapper = $('.va-default-wrapper')
+            $('.va-cancel-reply').css('display', 'none')
+            edit.appendTo(defaultWrapper)
+
+            $('#va-comment-editor').attr('placeholder', $('#va-comment-editor').attr('default-placeholder'))
+
+            this.replyId = -1
+        },
+        onPaginationChanged: function() {
+            this.onCancelReply()
+        },
+        getCommentCount: function()
+        {
+            if (this.commentCount > 0)
+            {
+                return this.commentCount+' 评论'
+            } else {
+                return ''
+            }
+        }
+    },
+    components: {
+        'va-comment': comments,
+        'va-editor-widget': editor,
+        'va-paginator': paginator
+    }
+})
+</script>
 
 <style>
     :root {
@@ -117,75 +190,3 @@
         to { transform: rotate(1turn); }
     }
 </style>
-
-<script lang="ts">
-import Vue from 'vue'
-import CommentModel from './commentModel'
-import comments from './widget/comments.vue'
-import editor from './widget/editor.vue'
-import paginator from './widget/paginator.vue'
-import Valine from '.'
-
-export default Vue.extend({
-    name: 'comment-widget',
-    inheritAttrs: false,
-    data: () => {
-        return {
-            owner: null,
-            allComments: [],
-            commentCount: 0,
-            isReplying: false,
-            isLoading: false,
-            replyId: -1
-        }
-    },
-    methods: {
-        onClickReply: function(e) {
-            this.isReplying = true
-
-            console.log('reply button')
-
-            let cid = $(e.target).attr('comment-id')
-            let edit = $('.va-editor-widget')
-            let corespondingWrapper = $('.va-comment-container[comment-id="'+cid+'"]>.va-comment-reply-wrapper')
-            edit.appendTo(corespondingWrapper)
-            $('.va-cancel-reply').css('display', '')
-
-            let object = $('.va-comment-container[comment-id="'+cid+'"] .va-nick').text()
-            let input = $('#va-comment-editor')
-            input.attr('placeholder', '@ '+object+',')
-            input.focus()
-
-            this.replyId = cid
-        },
-        onCancelReply: function() {
-            this.isReplying = false
-
-            console.log('cancel reply button')
-
-            let edit = $('.va-editor-widget')
-            let defaultWrapper = $('.va-default-wrapper')
-            $('.va-cancel-reply').css('display', 'none')
-            edit.appendTo(defaultWrapper)
-
-            $('#va-comment-editor').attr('placeholder', $('#va-comment-editor').attr('default-placeholder'))
-
-            this.replyId = -1
-        },
-        getCommentCount: function()
-        {
-            if (this.commentCount > 0)
-            {
-                return this.commentCount+' 评论'
-            } else {
-                return ''
-            }
-        }
-    },
-    components: {
-        'va-comment': comments,
-        'va-editor-widget': editor,
-        'va-paginator': paginator
-    }
-})
-</script>

@@ -2,7 +2,7 @@ export class ServerSideError extends Error
 {
     constructor()
     {
-        super('Sorry, Valine does not support Server-side rendering.')
+        super('Sorry, VaComment does not support Server-side rendering.')
         this.name = 'ServerSideError'
     }
 }

@@ -1,5 +1,5 @@
 <template>
-    <div class="va-paginator">
+    <div class="va-paginator smilies-scrollbara">
         <!-- <div class="va-pagin-previous">上</div> -->
         <div class="va-pagin"
             v-for="i in total"
@@ -14,6 +14,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+const $ = require('jquery')
 
 export default Vue.extend({
     data: () => {
@@ -25,6 +26,7 @@ export default Vue.extend({
     },
     methods: {
         onClickPagination: function (e) {
+            this.$emit('pagination-changed')
             this.current = $(e.target).attr('pagination')
         }
     },
@@ -49,41 +51,53 @@ export default Vue.extend({
         display: flex;
         padding-left: 0;
         list-style: none;
+        padding: 10px;
         border-radius: .25rem;
-        cursor: pointer;
-
-        justify-content: center;
+        /* justify-content: center; */
+        margin-top: 0.5rem;
+        overflow-x: auto;
+        /* overflow-y: hidden; */
+        width: max-content;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 100%;
+        box-sizing: border-box;
     }
 
     .va-pagin:hover {
         transform: translateY(-4px);
     }
 
-    .va-pagin {
-        display: inline-block;
-    }
-
-    .va-paginator .active {
+    .va-pagin.active {
         z-index: auto;
         border-color: transparent;
-        background-color: #ffa3b4;
+        background-color: #6fcfff;
+        color: #ffffff;
     }
 
     .va-pagin {
-        font-size: 1.2rem !important;
+        flex-shrink: 0;
+        font-size: 1rem !important;
         width: 35px !important;
         height: 35px !important;
         border-radius: 50%!important;
         transition: all 0.2s;
         line-height: 46px;
         position: relative;
-        border: .0625rem solid #dee2e6;
+        border: .0625rem solid #dee2e671;
+        cursor: pointer;
+        color: #7c7c7c;
         display: flex;
         margin: 0 3px;
         padding: 0;
         align-items: center;
         justify-content: center;
         user-select: none;
+    }
+
+    .va-pagin:not(.active):hover {
+        border: .0625rem solid #68686894;
+        color: #3f3f3f;
     }
 
 

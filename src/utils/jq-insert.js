@@ -1,4 +1,6 @@
-export default function execute()
+const $ = require('jquery')
+
+export default function()
 {
     $.fn.extend({
         "insert": function(myValue){
@@ -22,7 +24,7 @@ export default function execute()
                 this.focus()
             }
 
-            // 使Vue同步更新
+            // 使Vue的v-model同步更新
             this[0].dispatchEvent(new Event('input'));
         }
     })

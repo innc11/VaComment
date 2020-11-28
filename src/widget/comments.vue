@@ -18,7 +18,7 @@
 
                     <span class="va-badge-author" style="margin: 0;" v-if="comment.isauthor">作者</span>
 
-                    <span class="va-browser va-text">{{comment.ua.browser.name+' '+comment.ua.browser.version}}</span>
+                    <span class="va-browser va-text">{{(comment.ua.browser.name?comment.ua.browser.name:'')+' '+(comment.ua.browser.version?comment.ua.browser.version:'')}}</span>
                     <span class="va-os va-text" v-if="false">{{comment.ua.os.name+' '+comment.ua.os.version}}</span>
                 </div>
 
@@ -99,6 +99,10 @@
         color: #b3b3b3;
     }
 
+    .va-text.va-time {
+        font-size: 12px;
+    }
+
     /* .va-comment-content *{
         font-size: 0.875rem !important;
     } */
@@ -115,20 +119,29 @@
         color: #ffb35c;
     }
 
-    .va-comment-container {
+    .va-comment-container{
         flex-grow: 1;
     }
 
+    .va-all-comments > .va-comment:not(:first-child) > .va-comment-1 > .va-comment-container {
+        border-top: 1px solid #e5e9ef;
+        padding-top: 14px;
+        /* margin-top: 14px; */
+    }
+
+    .va-all-comments > .va-comment:not(:first-child) > .va-comment-1 > .va-comment-avatar {
+        margin-top: 14px;
+    }
+
     .va-comment-replies {
-        border-left: 1px dashed #00000000;
-        /* border-left: 1px dashed #c2c2c280; */
+        /* margin-top: 10px; */
     }
 
     .va-badge-author {
         color: #03acca;
         background-color: #c3f3fb;
         border-radius: 8px;
-        padding: 0.5em;
+        padding: 0.35em;
         text-align: center;
         vertical-align: baseline;
         white-space: nowrap;
@@ -144,7 +157,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import CommentModel from '../commentModel'
-import marked2 from '../markedLib'
+import marked2 from '../utils/markedLib'
 
 export default Vue.extend({
     name: 'comment-list',

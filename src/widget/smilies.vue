@@ -27,6 +27,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
+const $ = require('jquery')
+
 export default Vue.extend({
     methods: {
         getFirst: function(obj: any) {
@@ -60,8 +62,9 @@ export default Vue.extend({
         padding: 5px;
         cursor: pointer;
         margin: 5px;
-
         opacity: 0.4;
+        
+        transition: all 0.1s;
     }
 
     /* 表情包按钮中的表情预览 */
@@ -85,7 +88,8 @@ export default Vue.extend({
     /* 表情包按钮被选中时的效果 */
     .smilie-set-tab-selected {
         opacity: 1 !important;
-        border-bottom: 3px solid black;
+        // border-bottom: 3px solid black;
+        transform: translateY(-4px);
     }
 
     /* 表情列表 */
