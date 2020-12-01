@@ -5,8 +5,6 @@ import { CreateElement } from 'vue/types/umd'
 const $ = require('jquery')
 const cookies = require('brownies')
 const uaparser = require('ua-parser-js');
-const moment = require('moment');
-require('moment/locale/zh-cn');
 
 export default class VaComment
 {
@@ -14,9 +12,8 @@ export default class VaComment
     title: string
     getTitleCallback: () => string
 
-    index: any // Vue实例
-    editor: any // Vue实例
-    paginator: any // Vue实例
+    index: any // Vue组件实例
+    editor: any // Vue组件实例
     
     constructor(config: any)
     {
@@ -45,10 +42,12 @@ export default class VaComment
         }).$children[0]
 
         this.editor = this.lookupVueComponent('va-editor-widget')
-        this.paginator = this.lookupVueComponent('va-paginator')
 
         this.index.owner = this
-        this.paginator.owner = this
+        for (let component of this.lookupVueComponents('va-paginator'))
+        {
+            component.owner = this
+        }
 
         if (config.language)
             this.loadLanguage(config.language)
@@ -58,19 +57,23 @@ export default class VaComment
         this.refresh()
 
         this.smilies()
-
-        moment.locale('zh-cn')
     }
 
     lookupVueComponent(componentName: string)
     {
+        let result = this.lookupVueComponents(componentName)
+        return result.length>0? result[0]:null
+    }
+
+    lookupVueComponents(componentName: string)
+    {
+        let result = []
         for (let index in this.index.$children)
         {
             if (this.index.$children[index].$vnode.tag.replace(new RegExp('vue-component-\\d+-'), '') == componentName)
-                return this.index.$children[index]
+                result.push(this.index.$children[index])
         }
-
-        return null
+        return result
     }
 
     loadLanguage(language: any)
@@ -119,7 +122,7 @@ export default class VaComment
         // 打开加载动画s
         this.index.isLoading = true
 
-        let url = this.apiUrl+'/comment?url='+this.getTitleCallback()+'&pagination='+this.paginator.current+'&title='+this.title
+        let url = this.apiUrl+'/comment?url='+this.getTitleCallback()+'&pagination='+this.index.pagination_current+'&title='+this.title
         $.ajax({
             url: url,      async:    true,    type: 'GET',
             cache: false,  dataType: "json",  
@@ -144,14 +147,7 @@ export default class VaComment
                             website: comment.website,
                             isauthor: comment.isauthor,
                             ua: uaparser(comment.useragent),
-                            time: moment(comment.time * 1000).calendar(null, {
-                                sameDay: '[今天] HH:mm',
-                                nextDay: '[明天] HH:mm',
-                                nextWeek: 'dddd',
-                                lastDay: '[昨天] HH:mm',
-                                lastWeek: 'YYYY-MM-DD HH:mm',
-                                sameElse: 'YYYY-MM-DD HH:mm'
-                            }),
+                            time: comment.time,
                             content: comment.content,
                             replies: parseData(comment.replies.slice(0).sort(sortfun))
                         })
@@ -164,8 +160,9 @@ export default class VaComment
                 this.index.allComments = parseData(json.comments)
 
                 // 加载分页数据
-                this.paginator.total = json.pages
+                this.index.pagination_total = json.pages
 
+                // 设置评论数量
                 this.index.commentCount = json.count
 
                 // 隐藏加载动画

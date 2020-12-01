@@ -1,5 +1,6 @@
 <template>
     <div id="va-comment">
+        <!-- 编辑框默认的位置，当回复某个评论时会被临时移动到对应的地方 -->
         <div class="va-default-wrapper">
             <va-editor-widget 
                 v-bind:owner="owner"
@@ -9,25 +10,41 @@
             ></va-editor-widget>
         </div>
 
+        <!-- 评论数量显示 -->
         <div class="va-comment-count"><span v-html="getCommentCount()"></span></div>
-        
-        <div class="va-all-comments">
+
+        <!-- 头部页码条(只在非第一页时显示) -->
+        <va-paginator 
+            key="paginator-head"
+            v-show="pagination_current!=0"
+            v-bind:total="pagination_total"
+            v-bind:current="pagination_current"
+            v-on:pagination-changed="onPaginationChanged"
+        ></va-paginator>
+
+        <!-- 评论列表 -->
+        <transition-group name="vacomments" tag="div" class="va-all-comments">
             <va-comment 
                 v-for="comment in allComments"
-                v-bind:comment="comment" 
-                v-bind:is-replying="isReplying"
+                v-bind:key="comment.id"
+
+                v-bind:comment="comment"
                 v-bind:smaller-avatar="false"
                 v-on:reply="onClickReply"
             ></va-comment>
-        </div>
+        </transition-group>
 
-        <div class="va-loading-indicator" v-show="isLoading">
-            正在加载
-        </div>
-
-        <va-paginator
+        <!-- 加载动画 -->
+        <div class="va-loading-indicator" v-show="isLoading">正在加载</div>
+        
+        <!-- 底部页码条 -->
+        <va-paginator 
+            key="paginator-foot"
+            v-bind:total="pagination_total"
+            v-bind:current="pagination_current"
             v-on:pagination-changed="onPaginationChanged"
         ></va-paginator>
+
     </div>
 </template>
 
@@ -49,7 +66,9 @@ export default Vue.extend({
             commentCount: 0,
             isReplying: false,
             isLoading: false,
-            replyId: -1
+            replyId: -1,
+            pagination_total: 0,
+            pagination_current: 0,
         }
     },
     methods: {
@@ -81,8 +100,9 @@ export default Vue.extend({
 
             this.replyId = -1
         },
-        onPaginationChanged: function() {
+        onPaginationChanged: function(num) {
             this.onCancelReply()
+            this.pagination_current = num
         },
         getCommentCount: function()
         {
@@ -92,6 +112,20 @@ export default Vue.extend({
             } else {
                 return ''
             }
+        }
+    },
+    watch: {
+        pagination_total: function (newV, oldV) {
+            if (this.pagination_current > this.pagination_total)
+                this.pagination_current = this.pagination_total
+        },
+        pagination_current: function (newV, oldV) {
+            if (this.pagination_current > this.pagination_total)
+                this.pagination_current = this.pagination_total
+
+            // 切换页面时需要刷新
+            if (newV != oldV)
+                this.owner.refresh()
         }
     },
     components: {
@@ -189,4 +223,21 @@ export default Vue.extend({
         from { transform: rotate(0deg); }
         to { transform: rotate(1turn); }
     }
+
+    /* vue 动画 */
+
+    .vacomments-enter, 
+    .vacomments-leave-to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    .vacomments-leave-active {
+        position: absolute;
+    }
+
+    .va-comment {
+        transition: all 0.3s, opacity 0.1s;
+    }
+
 </style>

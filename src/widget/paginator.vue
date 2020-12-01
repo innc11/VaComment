@@ -20,27 +20,21 @@ export default Vue.extend({
     data: () => {
         return {
             owner: null,
-            total: 0,
-            current: 0
         }
     },
     methods: {
         onClickPagination: function (e) {
-            this.$emit('pagination-changed')
-            this.current = $(e.target).attr('pagination')
+            this.$emit('pagination-changed', parseInt($(e.target).attr('pagination')))
         }
     },
-    watch: {
-        total: function (newV, oldV) {
-            if (this.current > this.total)
-                this.current = this.total
+    props: {
+        total: {
+            type: Number,
+            required: true
         },
-        current: function (newV, oldV) {
-            if (this.current > this.total)
-                this.current = this.total
-
-            if (newV != oldV)
-                this.owner.refresh()
+        current: {
+            type: Number,
+            required: true
         }
     }
 })
