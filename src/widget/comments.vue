@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="va-comment-more-info">
-                    <span class="va-time va-text">{{comment.time}}</span>
+                    <span class="va-time va-text">{{parseDatetime(comment.time)}}</span>
                     <span class="va-reply-button va-text"
                         v-on:click="$emit('reply', $event)"
                         v-bind:comment-id="comment.id"
@@ -40,7 +40,6 @@
             <comment-list
                 v-for="cmt in comment.replies"
                 v-bind:comment="cmt" 
-                v-bind:is-replying="isReplying"
                 v-bind:smaller-avatar="true"
                 v-bind:class="indent(cmt.nick)? 'va-comment-replies-indent':''"
                 v-on:reply="$emit('reply', $event)"
@@ -123,13 +122,13 @@
         flex-grow: 1;
     }
 
-    .va-all-comments > .va-comment:not(:first-child) > .va-comment-1 > .va-comment-container {
+    .va-all-comments > div:not(.vacomments-leave-active)~.va-comment:not(:first-child) > .va-comment-1 > .va-comment-container {
         border-top: 1px solid #e5e9ef;
         padding-top: 14px;
         /* margin-top: 14px; */
     }
 
-    .va-all-comments > .va-comment:not(:first-child) > .va-comment-1 > .va-comment-avatar {
+    .va-all-comments > div:not(.vacomments-leave-active)~.va-comment:not(:first-child) > .va-comment-1 > .va-comment-avatar {
         margin-top: 14px;
     }
 
@@ -158,6 +157,10 @@
 import Vue from 'vue'
 import CommentModel from '../commentModel'
 import marked2 from '../utils/markedLib'
+const moment = require('moment');
+require('moment/locale/zh-cn');
+
+moment.locale('zh-cn')
 
 export default Vue.extend({
     name: 'comment-list',
@@ -167,6 +170,7 @@ export default Vue.extend({
         }
     },
     methods: {
+        // 判断评论是否需要缩进
         indent: function(subNick) {
             let hasParent = !!this.$parent.$options._parentVnode;
 
@@ -201,14 +205,20 @@ export default Vue.extend({
         parseMarkdown: function (text) {
             return marked2(text)
         },
+        parseDatetime: function(timestamp: number) {
+            return moment(timestamp * 1000).calendar(null, {
+                sameDay: '[今天] HH:mm',
+                nextDay: '[明天] HH:mm',
+                nextWeek: 'dddd',
+                lastDay: '[昨天] HH:mm',
+                lastWeek: 'YYYY-MM-DD HH:mm',
+                sameElse: 'YYYY-MM-DD HH:mm'
+            })
+        }
     },
     props: {
         comment: {
             type: Object,
-            required: true
-        },
-        isReplying: {
-            type: Boolean,
             required: true
         },
         smallerAvatar: {
