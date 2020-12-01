@@ -15,11 +15,14 @@
 
         <!-- 头部页码条(只在非第一页时显示) -->
         <va-paginator 
+            id="va-comment-paginator-head"
             key="paginator-head"
+            v-bind:flip="true"
             v-show="pagination_current!=0"
             v-bind:total="pagination_total"
             v-bind:current="pagination_current"
             v-on:pagination-changed="onPaginationChanged"
+            v-on:pagination-repeatedly-click="onHeadPaginationRepeatedlyClick"
         ></va-paginator>
 
         <!-- 评论列表 -->
@@ -27,7 +30,6 @@
             <va-comment 
                 v-for="comment in allComments"
                 v-bind:key="comment.id"
-
                 v-bind:comment="comment"
                 v-bind:smaller-avatar="false"
                 v-on:reply="onClickReply"
@@ -35,14 +37,16 @@
         </transition-group>
 
         <!-- 加载动画 -->
-        <div class="va-loading-indicator" v-show="isLoading">正在加载</div>
+        <div class="va-loading-indicator" v-show="showLoadingAnimation">正在加载</div>
         
         <!-- 底部页码条 -->
         <va-paginator 
+            id="va-comment-paginator-foot"
             key="paginator-foot"
             v-bind:total="pagination_total"
             v-bind:current="pagination_current"
             v-on:pagination-changed="onPaginationChanged"
+            v-on:pagination-repeatedly-click="onFootPaginationRepeatedlyClick"
         ></va-paginator>
 
     </div>
@@ -50,6 +54,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import VaComment from '.'
 import CommentModel from './commentModel'
 import comments from './widget/comments.vue'
 import editor from './widget/editor.vue'
@@ -61,20 +66,24 @@ export default Vue.extend({
     inheritAttrs: false,
     data: () => {
         return {
-            owner: null,
-            allComments: [],
-            commentCount: 0,
-            isReplying: false,
-            isLoading: false,
-            replyId: -1,
-            pagination_total: 0,
-            pagination_current: 0,
+            owner: null as VaComment, // VaComment实例
+            allComments: [] as Array<CommentModel>, // 所有的评论
+            commentCount: 0, // 所有的评论数量
+            isReplying: false, // 是否正在回复评论（是否显示'取消回复'按钮）
+            isLoading: false, // 是否显示加载动画
+            showLoadingAnimation: false, // 是否真正地显示加载动画
+            animationTimer: null, // 加载动画延迟显示计时器
+            delayTime: 1000, // 加载动画延迟显示的时间
+            replyId: -1, // 正在被回复的评论id（和isReplying很像）
+            pagination_total: 0, // 总页数
+            pagination_current: 0, // 当前页数
         }
     },
     methods: {
         onClickReply: function(e) {
             this.isReplying = true
 
+            // 将编辑框移动到被回复的评论下方
             let cid = $(e.target).attr('comment-id')
             let edit = $('.va-editor-widget')
             let corespondingWrapper = $('.va-comment-container[comment-id="'+cid+'"]>.va-comment-reply-wrapper')
@@ -91,6 +100,7 @@ export default Vue.extend({
         onCancelReply: function() {
             this.isReplying = false
 
+            // 将编辑框移回它本来的位置
             let edit = $('.va-editor-widget')
             let defaultWrapper = $('.va-default-wrapper')
             $('.va-cancel-reply').css('display', 'none')
@@ -100,18 +110,19 @@ export default Vue.extend({
 
             this.replyId = -1
         },
-        onPaginationChanged: function(num) {
+        onPaginationChanged: function(num: number) {
+            // 切换页时要将编辑框移回去，不然就消失了
             this.onCancelReply()
             this.pagination_current = num
         },
-        getCommentCount: function()
-        {
-            if (this.commentCount > 0)
-            {
-                return this.commentCount+' 评论'
-            } else {
-                return ''
-            }
+        onHeadPaginationRepeatedlyClick: function(num: number) {
+            $('#va-comment-paginator-foot').focus()
+        },
+        onFootPaginationRepeatedlyClick: function(num: number) {
+            $('#va-comment-paginator-head').focus()
+        },
+        getCommentCount: function() {
+            return (this.commentCount > 0)? this.commentCount+' 评论':''
         }
     },
     watch: {
@@ -126,6 +137,25 @@ export default Vue.extend({
             // 切换页面时需要刷新
             if (newV != oldV)
                 this.owner.refresh()
+        },
+        isLoading: function (newV, oldV) {
+            // 计时逻辑：延时打开，瞬时关闭
+            if(newV) {
+                // 打开计时器
+                this.animationTimer = setTimeout(() =>{
+                    this.animationTimer = null
+                    // 时间到了以后打开加载动画
+                    this.showLoadingAnimation = true
+                }, this.delayTime)
+            } else {
+                // 关闭计时器
+                if(this.animationTimer!=null) {
+                    clearTimeout(this.animationTimer)
+                    this.animationTimer = null
+                }
+                // 立即关闭加载动画
+                this.showLoadingAnimation = newV
+            }
         }
     },
     components: {
@@ -180,7 +210,7 @@ export default Vue.extend({
         touch-action: manipulation;
         cursor: pointer;
         white-space: nowrap;
-        padding: .5em 1.25em;
+        padding: 0.3em 0.95em;
         font-size: .875em;
         line-height: 1.42857143;
         user-select: none;
