@@ -94,7 +94,7 @@
     .va-browser, 
     .va-os,
     .va-time {
-        font-size: 0.75rem;
+        font-size: 0.75rem !important;
         color: #b3b3b3;
     }
 

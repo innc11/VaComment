@@ -74,7 +74,7 @@ export default Vue.extend({
             showLoadingAnimation: false, // 是否真正地显示加载动画
             animationTimer: null, // 加载动画延迟显示计时器
             delayTime: 1000, // 加载动画延迟显示的时间
-            replyId: -1, // 正在被回复的评论id（和isReplying很像）
+            replyId: -1, // 正在被回复的评论id（和isReplying功能类似）
             pagination_total: 0, // 总页数
             pagination_current: 0, // 当前页数
         }
