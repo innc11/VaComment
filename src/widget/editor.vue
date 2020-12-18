@@ -306,7 +306,7 @@ export default Vue.extend({
     // 扩展的面板
     .va-panel-extended {
         padding: 0px 8px;
-        border: 1px dashed #00000059;
+        border: 1px solid #00000059;
         box-sizing: border-box;
     }
 
