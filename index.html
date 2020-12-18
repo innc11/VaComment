@@ -22,6 +22,7 @@
 
         body {
             background-color: rgb(238, 238, 238);
+            margin: 0 auto;
         }
 
         header {
@@ -39,7 +40,7 @@
             height: 60px;
             font-size: 24px;
             line-height: 60px;
-            color: #4285f4;
+            color: #4286f494;
             vertical-align: base-line;
         }
 
@@ -50,7 +51,7 @@
         }
 
         .market {
-            background-color: #4285f4;
+            background-color: #4ec780;
             height: 398px;
             position: absolute;
             top: 60px;
@@ -144,21 +145,25 @@
     <div class="copy">
         &copy; 2017 <a href="https://github.com/xCss" target="_blank">云淡风轻</a>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script> -->
     <script>
-        var va = new Valine()
-
-        console.log(Valine.version())
-        console.log(Valine.isProduction())
         
+        console.log('VaComment version: '+VaComment.version())
+        console.log('production mode: '+VaComment.isProduction())
 
-        if (!/^http:\/\/localhost/.test(location.href)) {
-            var _hmt = _hmt || [];
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?fc2301b16d1a46c7899ef2b5afb651cc";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        }
+        var va = new VaComment({
+            title: document.querySelector('title').innerHTML,
+            element_id: 'va-comment-widget',
+            // api_url: 'https://server.innc11.cn:6675'
+            language: {
+                comment: '还有什么要补充的吗?\n(支持MD格式)',
+                nick: '昵称*',
+                mail: '邮箱(会被保密)',
+                website: '网站',
+            }
+        })
+        
+        console.log('api: '+va.apiUrl)
 
     </script>
 </body>
