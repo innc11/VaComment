@@ -249,7 +249,7 @@ export default class VaComment
 
     getCaptchaAPI()
     {
-        return this.apiUrl+'/captcha'
+        return this.apiUrl+'/captcha?_=' + (new Date().getTime())
     }
 
     static version()

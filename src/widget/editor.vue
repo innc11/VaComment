@@ -136,11 +136,10 @@ export default Vue.extend({
         },
         refreshCaptcha: function (e) {
             this.formData.captcha = ''
-            let url = this.captchaUrl
             this.captchaUrl = ''
             setTimeout(() => {
-                this.captchaUrl = url
-            }, 5)
+                this.captchaUrl = this.owner.getCaptchaAPI()
+            }, 10)
         },
         hideAlert: function () {
             this.alertMessage.text = ''
