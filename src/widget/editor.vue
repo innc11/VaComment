@@ -63,6 +63,7 @@ import Vue from 'vue'
 import smiliesComponet from './smilies.vue'
 import marked2 from '../utils/markedLib'
 import inserfunc from '../utils/jq-insert.js'
+import CommentingModel from '../model/commentingModel'
 import VaComment from '..'
 
 export default Vue.extend({
@@ -123,14 +124,12 @@ export default Vue.extend({
             }
 
             this.owner.submit({
-                url: location.pathname,
                 nick: this.formData.nick,
                 mail: this.formData.mail,
                 website: this.formData.website,
                 content: this.formData.content,
-                parent: -1,
                 captcha: this.formData.captcha,
-            })
+            } as CommentingModel)
 
             this.owner.refresh()
         },

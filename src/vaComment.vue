@@ -1,54 +1,55 @@
 <template>
-    <div id="va-comment">
-        <!-- 编辑框默认的位置，当回复某个评论时会被临时移动到对应的地方 -->
-        <div class="va-default-wrapper">
-            <va-editor-widget 
-                v-bind:owner="owner"
-                v-bind:is-replying="isReplying"
-                v-on:cancel-reply="onCancelReply"
-                v-bind="$attrs"
-            ></va-editor-widget>
+    <div id="va-comment-widget">
+        <div id="va-comment">
+            <!-- 编辑框默认的位置，当回复某个评论时会被临时移动到对应的地方 -->
+            <div class="va-default-wrapper">
+                <va-editor-widget 
+                    v-bind:owner="owner"
+                    v-bind:is-replying="isReplying"
+                    v-on:cancel-reply="onCancelReply"
+                    v-bind="$attrs"
+                ></va-editor-widget>
+            </div>
+
+            <!-- 评论数量显示 -->
+            <div class="va-comment-count"><span v-html="getCommentCount()"></span></div>
+
+            <!-- 头部页码条(只在非第一页时显示) -->
+            <va-paginator 
+                id="va-comment-paginator-head"
+                key="paginator-head"
+                v-bind:flip="true"
+                v-show="pagination_current!=0"
+                v-bind:total="pagination_total"
+                v-bind:current="pagination_current"
+                v-on:pagination-changed="onPaginationChanged"
+                v-on:pagination-repeatedly-click="onHeadPaginationRepeatedlyClick"
+            ></va-paginator>
+
+            <!-- 评论列表 -->
+            <transition-group name="vacomments" tag="div" class="va-all-comments">
+                <va-comment 
+                    v-for="comment in allComments"
+                    v-bind:key="comment.id"
+                    v-bind:comment="comment"
+                    v-bind:smaller-avatar="false"
+                    v-on:reply="onClickReply"
+                ></va-comment>
+            </transition-group>
+
+            <!-- 加载动画 -->
+            <div class="va-loading-indicator" v-show="showLoadingAnimation">正在加载</div>
+            
+            <!-- 底部页码条 -->
+            <va-paginator 
+                id="va-comment-paginator-foot"
+                key="paginator-foot"
+                v-bind:total="pagination_total"
+                v-bind:current="pagination_current"
+                v-on:pagination-changed="onPaginationChanged"
+                v-on:pagination-repeatedly-click="onFootPaginationRepeatedlyClick"
+            ></va-paginator>
         </div>
-
-        <!-- 评论数量显示 -->
-        <div class="va-comment-count"><span v-html="getCommentCount()"></span></div>
-
-        <!-- 头部页码条(只在非第一页时显示) -->
-        <va-paginator 
-            id="va-comment-paginator-head"
-            key="paginator-head"
-            v-bind:flip="true"
-            v-show="pagination_current!=0"
-            v-bind:total="pagination_total"
-            v-bind:current="pagination_current"
-            v-on:pagination-changed="onPaginationChanged"
-            v-on:pagination-repeatedly-click="onHeadPaginationRepeatedlyClick"
-        ></va-paginator>
-
-        <!-- 评论列表 -->
-        <transition-group name="vacomments" tag="div" class="va-all-comments">
-            <va-comment 
-                v-for="comment in allComments"
-                v-bind:key="comment.id"
-                v-bind:comment="comment"
-                v-bind:smaller-avatar="false"
-                v-on:reply="onClickReply"
-            ></va-comment>
-        </transition-group>
-
-        <!-- 加载动画 -->
-        <div class="va-loading-indicator" v-show="showLoadingAnimation">正在加载</div>
-        
-        <!-- 底部页码条 -->
-        <va-paginator 
-            id="va-comment-paginator-foot"
-            key="paginator-foot"
-            v-bind:total="pagination_total"
-            v-bind:current="pagination_current"
-            v-on:pagination-changed="onPaginationChanged"
-            v-on:pagination-repeatedly-click="onFootPaginationRepeatedlyClick"
-        ></va-paginator>
-
     </div>
 </template>
 

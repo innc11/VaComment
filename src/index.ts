@@ -2,15 +2,18 @@ import Vue from 'vue'
 import { MissingNecessaryFieldError, ServerSideError } from "./exception"
 import indexvue from './vaComment.vue'
 import { CreateElement } from 'vue/types/umd'
+import CommentingModel from './model/commentingModel'
 const $ = require('jquery')
 const cookies = require('brownies')
 const uaparser = require('ua-parser-js');
 
 export default class VaComment
 {
-    apiUrl = 'http://127.0.0.1:600'
-    title: string
-    getTitleCallback: () => string
+    api = 'http://127.0.0.1:600'
+    key: string
+    pageComment: string
+    elementId: 'va-comment-widget'
+    language: any
 
     index: any // Vue组件实例
     editor: any // Vue组件实例
@@ -21,23 +24,18 @@ export default class VaComment
             throw new MissingNecessaryFieldError('setting-parameter-object')
         if (!config.title)
             throw new MissingNecessaryFieldError('title')
-        this.title = config.title
+        
+        this.key =         config.key || location.pathname
+        this.api =         config.api_url || this.api
+        this.elementId =   config.element_id || this.elementId
+        this.pageComment = config.pageComment || document.querySelector('title').innerText
+        this.language =    config.language || this.language
+    }
 
-        let id = 'va-comment-widget'
-        
-        if (config.element_id)
-            id = config.element_id
-        
-        if (config.api_url)
-            this.apiUrl = config.api_url
-        
-        if (config.get_title_callback)
-            this.getTitleCallback = config.get_title_callback
-        else
-            this.getTitleCallback = () => location.pathname
-
+    create()
+    {
         this.index = new Vue({
-            el: '#'+id,
+            el: '#'+this.elementId,
             render: (e: CreateElement) => e(indexvue)
         }).$children[0]
 
@@ -49,14 +47,19 @@ export default class VaComment
             component.owner = this
         }
 
-        if (config.language)
-            this.loadLanguage(config.language)
+        this.loadLanguage()
 
         this.loadCookies()
         
         this.refresh()
 
         this.smilies()
+    }
+
+    destroy()
+    {
+        this.editor.$destroy()
+        this.index.$destroy()
     }
 
     lookupVueComponent(componentName: string)
@@ -76,22 +79,26 @@ export default class VaComment
         return result
     }
 
-    loadLanguage(language: any)
+    loadLanguage()
     {
-        if (language.comment)
-            this.editor.editorPlaceholder = language.comment
+        if(!this.language)
+            return
+        
+        if (this.language.comment)
+            this.editor.editorPlaceholder = this.language.comment
 
-        if (language.nick)
-            this.editor.nickPlaceholder = language.nick
+        if (this.language.nick)
+            this.editor.nickPlaceholder = this.language.nick
 
-        if (language.mail)
-            this.editor.mailPlaceholder = language.mail
+        if (this.language.mail)
+            this.editor.mailPlaceholder = this.language.mail
 
-        if (language.website)
-            this.editor.websitePlaceholder = language.website
+        if (this.language.website)
+            this.editor.websitePlaceholder = this.language.website
+    
     }
 
-    checkIfServerSide(): void
+    checkServerSide(): void
     {
         if (typeof document === 'undefined')
         {
@@ -122,7 +129,7 @@ export default class VaComment
         // 打开加载动画s
         this.index.isLoading = true
 
-        let url = this.apiUrl+'/comment?url='+this.getTitleCallback()+'&pagination='+this.index.pagination_current+'&title='+this.title
+        let url = `${this.api}/comment?key=${this.key}&pagination=${this.index.pagination_current}&comment=${this.pageComment}`
         $.ajax({
             url: url,      async:    true,    type: 'GET',
             cache: false,  dataType: "json",  
@@ -179,12 +186,15 @@ export default class VaComment
     }
 
     // 提交评论
-    submit(comment: any)
+    submit(comment: CommentingModel)
     {
         comment.parent = this.index.replyId
-        comment.title = this.title
+        comment.key = this.key
+        comment.comment = this.pageComment
 
-        let URL = this.apiUrl+'/comment?url='+this.getTitleCallback()
+        console.log(JSON.stringify(comment))
+
+        let URL = this.api+'/comment'
         $.ajax({
             url: URL,      async:    true,    type: 'POST',
             cache: false,  dataType: "json",  data: JSON.stringify(comment),
@@ -212,7 +222,7 @@ export default class VaComment
     smilies()
     {
         $.ajax({
-            url: this.apiUrl+'/smilie_api',   async:  true,    
+            url: this.api+'/smilie_api',   async:  true,    
             cache: false,  dataType: "json",  type:  'GET',
             xhrFields: { withCredentials: true }, // 必须带上cookie
             success: (res: any) => {
@@ -221,7 +231,7 @@ export default class VaComment
                     let smilieSet = sm[0]
                     this.editor.smiliesComponet.smilies[smilieSet] = {}
 
-                    let url2 = this.apiUrl+'/smilie_api/'+smilieSet
+                    let url2 = this.api+'/smilie_api/'+smilieSet
                     // console.log(url2)
                     $.ajax({
                         url: url2,   async:  true,    
@@ -249,7 +259,7 @@ export default class VaComment
 
     getCaptchaAPI()
     {
-        return this.apiUrl+'/captcha?_=' + (new Date().getTime())
+        return this.api+'/captcha?_=' + (new Date().getTime())
     }
 
     static version()
