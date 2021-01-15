@@ -11,7 +11,7 @@ export default class VaComment
 {
     api = 'http://127.0.0.1:600'
     key: string
-    pageComment: string
+    pageLabel: string
     elementId: 'va-comment-widget'
     language: any
     mailEnabled = true
@@ -29,7 +29,7 @@ export default class VaComment
         this.key =         config.key || location.pathname
         this.api =         config.api || this.api
         this.elementId =   config.elementId || this.elementId
-        this.pageComment = config.pageComment || document.querySelector('title').innerText
+        this.pageLabel =   config.pageLabel || document.querySelector('title').innerText
         this.language =    config.language || this.language
 
         this.mailEnabled =    config.mailEnabled!=null? config.mailEnabled:this.mailEnabled
@@ -143,7 +143,7 @@ export default class VaComment
         // 打开加载动画s
         this.index.isLoading = true
 
-        let url = `${this.api}/comment?key=${this.key}&pagination=${this.index.pagination_current}&comment=${this.pageComment}`
+        let url = `${this.api}/comment?key=${this.key}&pagination=${this.index.pagination_current}&label=${this.pageLabel}`
 
         $.ajax({
             url: url,      async:    true,    type: 'GET',
@@ -205,7 +205,7 @@ export default class VaComment
     {
         comment.parent = this.index.replyId
         comment.key = this.key
-        comment.comment = this.pageComment
+        comment.label = this.pageLabel
 
         let URL = this.api+'/comment'
         $.ajax({

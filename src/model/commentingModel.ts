@@ -2,7 +2,7 @@
 export default interface CommentingModel
 {
     key?: string,
-    comment?: string
+    label?: string
     nick: string,
     mail: string,
     website: string,
