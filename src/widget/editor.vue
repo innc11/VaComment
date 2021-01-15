@@ -6,9 +6,9 @@
         >取消回复</div>
 
         <div class="va-nick-mail-website">
-            <input name="nick" v-bind:placeholder="nickPlaceholder" type="text" class="va-input-field n-m-w" v-model="formData.nick">
-            <input name="mail" v-bind:placeholder="mailPlaceholder" type="email" class="va-input-field n-m-w" v-model="formData.mail">
-            <input name="website" v-bind:placeholder="websitePlaceholder" type="text" class="va-input-field n-m-w" v-model="formData.website">
+            <input name="nick" v-bind:placeholder="nickPlaceholder" type="text" class="va-input-field n-m-w" v-bind:style="WidthOfNickMailWebsite()" v-model="formData.nick">
+            <input name="mail" v-bind:placeholder="mailPlaceholder" type="email" class="va-input-field n-m-w" v-bind:style="WidthOfNickMailWebsite()" v-if="mailEnabled" v-model="formData.mail">
+            <input name="website" v-bind:placeholder="websitePlaceholder" type="text" class="va-input-field n-m-w" v-bind:style="WidthOfNickMailWebsite()" v-if="websiteEnabled" v-model="formData.website">
         </div>
         
         <textarea id="va-comment-editor" 
@@ -30,7 +30,7 @@
                 </div>
             </div>
             <div class="va-tools-bar">
-                <div class="va-captcha">
+                <div class="va-captcha" v-if="captchaEnabled">
                     <img title="点击刷新" style="border-radius: 3px;" v-bind:src="captchaUrl" v-on:click="refreshCaptcha"></img>
                     <input type="text" class="va-input-field" style="margin-left: 7px;" placeholder="验证码" v-model="formData.captcha">
                 </div>
@@ -99,14 +99,14 @@ export default Vue.extend({
                 return
             }
 
-            if (process.env.NODE_ENV === 'production') {
+            if (process.env.NODE_ENV === 'production' && this.captchaEnabled) {
                 if (!this.formData.captcha) {
                     this.showAlert('需要填写验证码哦')
                     return
                 }
             }
 
-            if (this.formData.mail) {
+            if (this.formData.mail && this.mailEnabled) {
                 let reg = new RegExp('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$', 'g')
                 if (!this.formData.mail.match(reg)) {
                     this.showAlert('邮箱请使用xx@xx.xx格式')
@@ -114,11 +114,11 @@ export default Vue.extend({
                 }
             }
 
-            if (this.formData.website) {
+            if (this.formData.website && this.websiteEnabled) {
                 let reg = new RegExp('^https?://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?$', 'g')
                 if (!this.formData.website.match(reg))
                 {
-                    this.showAlert('网站格式请使用http://或者https://开头')
+                    this.showAlert('网站格式请使用http(s)://开头')
                     return
                 }
             }
@@ -145,6 +145,13 @@ export default Vue.extend({
         },
         showAlert: function (message, button='OK') {
             this.alertMessage.text = message
+        },
+        WidthOfNickMailWebsite: function() {
+            if(!this.mailEnabled && !this.websiteEnabled)
+                return 'width: 100%'
+            if(this.mailEnabled && this.websiteEnabled)
+                return 'width: 33.33%'
+            return 'width: 50%'
         }
     },
     data: () => {
@@ -183,7 +190,19 @@ export default Vue.extend({
         isReplying: {
             type: Boolean,
             required: true
-        }
+        },
+        mailEnabled: {
+            type: Boolean,
+            required: true
+        },
+        websiteEnabled: {
+            type: Boolean,
+            required: true
+        },
+        captchaEnabled: {
+            type: Boolean,
+            required: true
+        },
     },
     components: {
         'smilies-comment': smiliesComponet,

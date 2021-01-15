@@ -14,6 +14,9 @@ export default class VaComment
     pageComment: string
     elementId: 'va-comment-widget'
     language: any
+    mailEnabled = true
+    websiteEnabled = true
+    captchaEnabled = true
 
     index: any // Vue组件实例
     editor: any // Vue组件实例
@@ -28,6 +31,10 @@ export default class VaComment
         this.elementId =   config.elementId || this.elementId
         this.pageComment = config.pageComment || document.querySelector('title').innerText
         this.language =    config.language || this.language
+
+        this.mailEnabled =    config.mailEnabled!=null? config.mailEnabled:this.mailEnabled
+        this.websiteEnabled = config.websiteEnabled!=null? config.websiteEnabled:this.websiteEnabled
+        this.captchaEnabled = config.captchaEnabled!=null? config.captchaEnabled:this.captchaEnabled
     }
 
     create()
@@ -40,10 +47,12 @@ export default class VaComment
         this.editor = this.lookupVueComponent('va-editor-widget')
 
         this.index.owner = this
+        this.index.mailEnabled = this.mailEnabled
+        this.index.websiteEnabled = this.websiteEnabled
+        this.index.captchaEnabled = this.captchaEnabled
+
         for (let component of this.lookupVueComponents('va-paginator'))
-        {
             component.owner = this
-        }
 
         this.loadLanguage()
 

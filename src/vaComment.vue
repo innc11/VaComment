@@ -6,6 +6,9 @@
                 <va-editor-widget 
                     v-bind:owner="owner"
                     v-bind:is-replying="isReplying"
+                    v-bind:mail-enabled="mailEnabled"
+                    v-bind:website-enabled="websiteEnabled"
+                    v-bind:captcha-enabled="captchaEnabled"
                     v-on:cancel-reply="onCancelReply"
                     v-bind="$attrs"
                 ></va-editor-widget>
@@ -56,7 +59,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import VaComment from '.'
-import CommentModel from './commentModel'
+import CommentModel from './model/commentModel'
 import comments from './widget/comments.vue'
 import editor from './widget/editor.vue'
 import paginator from './widget/paginator.vue'
@@ -78,6 +81,9 @@ export default Vue.extend({
             replyId: -1, // 正在被回复的评论id（和isReplying功能类似）
             pagination_total: 0, // 总页数
             pagination_current: 0, // 当前页数
+            mailEnabled: true, // 启用邮箱输入框
+            websiteEnabled: true, // 启用网站输入框
+            captchaEnabled: true // 启用验证码
         }
     },
     methods: {
