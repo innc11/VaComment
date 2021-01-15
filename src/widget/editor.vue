@@ -254,7 +254,7 @@ export default Vue.extend({
     // 输入框
     #va-comment-editor {
         width: 100%;
-        min-height: 8.75em;
+        min-height: 10em;
         font-size: 0.875em;
         margin-top: 0.5rem;
         background: transparent;

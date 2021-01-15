@@ -22,12 +22,10 @@ export default class VaComment
     {
         if (!config)
             throw new MissingNecessaryFieldError('setting-parameter-object')
-        if (!config.title)
-            throw new MissingNecessaryFieldError('title')
         
         this.key =         config.key || location.pathname
-        this.api =         config.api_url || this.api
-        this.elementId =   config.element_id || this.elementId
+        this.api =         config.api || this.api
+        this.elementId =   config.elementId || this.elementId
         this.pageComment = config.pageComment || document.querySelector('title').innerText
         this.language =    config.language || this.language
     }
@@ -60,6 +58,13 @@ export default class VaComment
     {
         this.editor.$destroy()
         this.index.$destroy()
+        this.editor = null
+        this.index = null
+    }
+
+    isDestroyed()
+    {
+        return this.index == null
     }
 
     lookupVueComponent(componentName: string)
@@ -130,6 +135,7 @@ export default class VaComment
         this.index.isLoading = true
 
         let url = `${this.api}/comment?key=${this.key}&pagination=${this.index.pagination_current}&comment=${this.pageComment}`
+
         $.ajax({
             url: url,      async:    true,    type: 'GET',
             cache: false,  dataType: "json",  
@@ -191,8 +197,6 @@ export default class VaComment
         comment.parent = this.index.replyId
         comment.key = this.key
         comment.comment = this.pageComment
-
-        console.log(JSON.stringify(comment))
 
         let URL = this.api+'/comment'
         $.ajax({

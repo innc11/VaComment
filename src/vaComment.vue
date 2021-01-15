@@ -176,11 +176,7 @@ export default Vue.extend({
     body {
         color: #555;
     }
-
-    #va-comment-widget {
-        padding: 2rem 3rem;
-    }
-
+    
     .va-text {
         /* color: #555; */
         font-family: var(--va-text);
