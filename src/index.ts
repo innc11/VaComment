@@ -3,6 +3,7 @@ import { MissingNecessaryFieldError, ServerSideError } from "./exception"
 import indexvue from './vaComment.vue'
 import { CreateElement } from 'vue/types/umd'
 import CommentingModel from './model/commentingModel'
+import CommentModel from './model/commentModel'
 const $ = require('jquery')
 const cookies = require('brownies')
 const uaparser = require('ua-parser-js');
@@ -156,9 +157,9 @@ export default class VaComment
                     return 0
                 }
 
-                function parseData(comments: Array<any>)
+                function parseData(comments: any[])
                 {
-                    let allcomments = [] as Array<any>
+                    let allcomments = [] as Array<CommentModel>
 
                     for (let comment of comments)
                     {
@@ -168,18 +169,19 @@ export default class VaComment
                             nick: comment.nick,
                             website: comment.website,
                             isauthor: comment.isauthor,
+                            authorlabel: comment.authorlabel,
                             ua: uaparser(comment.useragent),
                             time: comment.time,
                             content: comment.content,
                             replies: parseData(comment.replies.slice(0).sort(sortfun))
-                        })
+                        } )
                     }
 
                     return allcomments
                 }
 
                 // 加载(并显示)评论数据
-                this.index.allComments = parseData(json.comments)
+                this.index.allComments = parseData(json.comments) as CommentModel[]
 
                 // 加载分页数据
                 this.index.pagination_total = json.pages

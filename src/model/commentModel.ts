@@ -5,9 +5,10 @@ export default interface CommentModel
     avatar: string
     nick: string
     website: string
-    browser: string
-    os: string
+    isauthor: boolean
+    authorlabel: string
+    ua: object
     time: number
     content: string
-    replies: Array<CommentModel>
+    replies: CommentModel[]
 }

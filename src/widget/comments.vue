@@ -16,7 +16,7 @@
                         v-bind:class="comment.website? 'va-nick-with-link':''"
                     >{{comment.nick}}</a>
 
-                    <span class="va-badge-author" style="margin: 0;" v-if="comment.isauthor">作者</span>
+                    <span class="va-badge-author" style="margin: 0;" v-if="comment.isauthor">{{comment.authorlabel}}</span>
 
                     <span class="va-browser va-text">{{(comment.ua.browser.name?comment.ua.browser.name:'')+' '+(comment.ua.browser.version?comment.ua.browser.version:'')}}</span>
                     <span class="va-os va-text" v-if="false">{{comment.ua.os.name+' '+comment.ua.os.version}}</span>
@@ -154,8 +154,8 @@
 </style>
 
 <script lang="ts">
+import { type } from 'os';
 import Vue from 'vue'
-import CommentModel from '../commentModel'
 import marked2 from '../utils/markedLib'
 const moment = require('moment');
 require('moment/locale/zh-cn');
@@ -218,7 +218,7 @@ export default Vue.extend({
     },
     props: {
         comment: {
-            type: Object,
+            type: Object, // instance of CommentModel
             required: true
         },
         smallerAvatar: {
