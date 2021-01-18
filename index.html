@@ -148,13 +148,11 @@
     <!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script> -->
     <script>
         
-        console.log('VaComment version: '+VaComment.version())
-        console.log('production mode: '+VaComment.isProduction())
+        console.log('VaComment v'+VaComment.version()+' ('+(VaComment.isProduction()?'prod':'dev')+')')
 
         var va = new VaComment({
-            title: document.querySelector('title').innerHTML,
-            element_id: 'va-comment-widget',
-            // api_url: 'https://server.innc11.cn:6675'
+            elementId: 'va-comment-widget',
+            // api: 'https://server.innc11.cn:6679',
             language: {
                 comment: '还有什么要补充的吗?\n(支持MD格式)',
                 nick: '昵称*',
@@ -162,8 +160,10 @@
                 website: '网站',
             }
         })
+
+        va.create()
         
-        console.log('api: '+va.apiUrl)
+        console.log('api: '+va.api)
 
     </script>
 </body>
