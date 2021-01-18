@@ -32,8 +32,9 @@ export default class VaComment
         this.api =         config.api || this.api
         this.elementId =   config.elementId || this.elementId
         this.pageLabel =   config.pageLabel || document.querySelector('title').innerText
+        this.language =    config.language || this.language
+
         this.paginatorbarLength =   config.barLength!=null? config.barLength:this.paginatorbarLength
-        
         this.captchaEnabled = config.captchaEnabled!=null? config.captchaEnabled:this.captchaEnabled
 
         this.mailEnabled =    config.mailEnabled!=null? config.mailEnabled:this.mailEnabled
