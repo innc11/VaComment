@@ -15,6 +15,7 @@ export default class VaComment
     pageLabel: string
     elementId: 'va-comment-widget'
     language: any
+    paginatorbarLength = 4
     mailEnabled = true
     websiteEnabled = true
     captchaEnabled = true
@@ -31,7 +32,9 @@ export default class VaComment
         this.api =         config.api || this.api
         this.elementId =   config.elementId || this.elementId
         this.pageLabel =   config.pageLabel || document.querySelector('title').innerText
-        this.language =    config.language || this.language
+        this.paginatorbarLength =   config.barLength!=null? config.barLength:this.paginatorbarLength
+        
+        this.captchaEnabled = config.captchaEnabled!=null? config.captchaEnabled:this.captchaEnabled
 
         this.mailEnabled =    config.mailEnabled!=null? config.mailEnabled:this.mailEnabled
         this.websiteEnabled = config.websiteEnabled!=null? config.websiteEnabled:this.websiteEnabled
@@ -48,6 +51,7 @@ export default class VaComment
         this.editor = this.lookupVueComponent('va-editor-widget')
 
         this.index.owner = this
+        this.index.barLength = this.paginatorbarLength
         this.index.mailEnabled = this.mailEnabled
         this.index.websiteEnabled = this.websiteEnabled
         this.index.captchaEnabled = this.captchaEnabled

@@ -1,12 +1,19 @@
 <template>
     <div class="va-paginator smilies-scrollbara" tabindex="-1">
-        <!-- <div class="va-pagin-previous">上</div> -->
+
+        <div class="va-pagin va-pagin-fist"
+            style="margin-right: 20px;"
+            v-if="firstDisplayed"
+            v-bind:pagination="0"
+            v-on:click="onClickPagination"
+        >1</div>
+
         <div class="va-pagin"
-            v-for="i in total"
+            v-for="i in visibles"
             v-bind:class="i-1==current? 'active':''"
             v-bind:pagination="i-1"
             v-on:click="onClickPagination"
-            v-show="total>1"
+            v-if="total>1"
         >
             <div class="va-pain">{{i}}</div>
             <div class="va-pain-icon">
@@ -21,7 +28,12 @@
             
         </div>
         
-        <!-- <div class="va-pagin-next">下</div> -->
+        <div class="va-pagin va-pagin-last"
+            style="margin-left: 20px;"
+            v-if="lastDisplayed"
+            v-bind:pagination="total"
+            v-on:click="onClickPagination"
+        >{{total+1}}</div>
     </div>
 </template>
 
@@ -57,6 +69,28 @@ export default Vue.extend({
                 this.$emit('pagination-repeatedly-click', pain)
         }
     },
+    computed: {
+        visibles: function() {
+            let count = this.barLength
+            let begin = Math.max(this.current - count, 0)
+            let end = Math.min(this.current + count, this.total)
+
+            let result = []
+
+            for(let i=begin+1;i<end+2;i++)
+                result.push(i)
+            
+            return result
+        },
+        firstDisplayed: function() {
+            let begin = Math.max(this.current - this.barLength, 0)
+            return begin > 0
+        },
+        lastDisplayed: function() {
+            let end = Math.min(this.current + this.barLength, this.total)
+            return end < this.total
+        }
+    },
     props: {
         total: {
             type: Number,
@@ -65,6 +99,11 @@ export default Vue.extend({
         current: {
             type: Number,
             required: true
+        },
+        barLength: {
+            type: Number,
+            default: 3,
+            validator: (value) => value > 0
         },
         flip: {
             type: Boolean,

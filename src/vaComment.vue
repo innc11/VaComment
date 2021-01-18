@@ -25,6 +25,7 @@
                 v-show="pagination_current!=0"
                 v-bind:total="pagination_total"
                 v-bind:current="pagination_current"
+                v-bind:barLength="barLength"
                 v-on:pagination-changed="onPaginationChanged"
                 v-on:pagination-repeatedly-click="onHeadPaginationRepeatedlyClick"
             ></va-paginator>
@@ -49,6 +50,7 @@
                 key="paginator-foot"
                 v-bind:total="pagination_total"
                 v-bind:current="pagination_current"
+                v-bind:barLength="barLength"
                 v-on:pagination-changed="onPaginationChanged"
                 v-on:pagination-repeatedly-click="onFootPaginationRepeatedlyClick"
             ></va-paginator>
@@ -81,6 +83,7 @@ export default Vue.extend({
             replyId: -1, // 正在被回复的评论id（和isReplying功能类似）
             pagination_total: 0, // 总页数
             pagination_current: 0, // 当前页数
+            barLength: 3, // 翻页器的长度
             mailEnabled: true, // 启用邮箱输入框
             websiteEnabled: true, // 启用网站输入框
             captchaEnabled: true // 启用验证码
