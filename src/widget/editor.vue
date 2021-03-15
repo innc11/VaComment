@@ -115,7 +115,7 @@ export default Vue.extend({
             }
 
             if (this.formData.website && this.websiteEnabled) {
-                let reg = new RegExp('^https?://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?$', 'g')
+                let reg = new RegExp('^https?://', 'g')
                 if (!this.formData.website.match(reg))
                 {
                     this.showAlert('网站格式请使用http(s)://开头')
