@@ -6,8 +6,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env: 
-      branch: pages
     steps:
       - name: Prepare
         run: sudo timedatectl set-timezone 'Asia/Shanghai'
@@ -28,7 +26,7 @@ jobs:
           yarn
           yarn run build
           
-      - name: Depoly
+      - name: Upload Release
         uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
@@ -36,3 +34,22 @@ jobs:
           file: "dist/*"
           draft: false
           tags: true
+
+      - name: Depoly Builds
+        env:
+          repository: https://${{ secrets.TOKEN }}@github.com/innc11/AweCommentFiles
+          branch: main
+        run: |
+          export datatime=`date +"%b %d, %Y %H:%M:%S"`
+          cd dist
+          git init
+          git config user.email aprilforests@qq.com
+          git config user.name innc11
+          git status
+          git remote add github $repository
+          git checkout -b $branch
+          git add --all
+          git commit -m "Auto deploy from Github Actinos #$GITHUB_RUN_NUMBER on $datatime"
+          git push github $branch --force
+          echo "Successfully deployed!"
+          echo "See: $repository/tree/$branch"
