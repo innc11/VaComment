@@ -1,14 +1,12 @@
 on:
-  pull_request:
-    branches: [ main ]
   push:
-    branches: [ main ]
+    tags: 
+      - "v*"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     env: 
-      token: ${{ secrets.TOKEN }}
       branch: pages
     steps:
       - name: Prepare
@@ -31,17 +29,10 @@ jobs:
           yarn run build
           
       - name: Depoly
-        run: |
-          export datatime=`date +"%b %d, %Y %H:%M:%S"`
-          cd dist
-          git init
-          git config user.email innc11@163.com
-          git config user.name innc11
-          git status
-          git remote add github https://$token@github.com/$GITHUB_REPOSITORY
-          git checkout -b $branch
-          git add --all
-          git commit -m "Auto deploy from Github Actinos #$GITHUB_RUN_NUMBER on $datatime"
-          git push github $branch --force
-          echo "Successfully deployed!"
-          echo "See: https://github.com/$GITHUB_REPOSITORY/tree/$branch"
+        uses: xresloader/upload-to-github-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with: 
+          file: "dist/*"
+          draft: false
+          tags: true
