@@ -27,15 +27,6 @@ jobs:
           yarn
           yarn run build
           
-      - name: Upload Release
-        uses: xresloader/upload-to-github-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with: 
-          file: "dist/*"
-          draft: false
-          tags: true
-          
       - name: Check Out TagName
         id: checkout-tagname
         shell: "python3 {0}"
