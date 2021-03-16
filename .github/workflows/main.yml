@@ -13,9 +13,7 @@ jobs:
       - name: Load Cache For Node
         uses: actions/cache@v2
         with: 
-          path: |
-            node_modules
-            .parcel-cache
+          path: "**/node_modules"
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock', 'package.json') }}
       
       - name: Load Cache For Git
