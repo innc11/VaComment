@@ -81,6 +81,8 @@ jobs:
           fi
           
           git pull github $branch --rebase
+          
+          rm -rf ./*
           cp -R ../dist/* .
           git add --all
           git commit -m "Auto deploy from Github Actinos #$GITHUB_RUN_NUMBER on $datatime" || true
