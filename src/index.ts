@@ -22,8 +22,8 @@ export default class VaComment
     websiteEnabled = true
     captchaEnabled = true
 
-    index: any // Vue组件实例
-    editor: any // Vue组件实例
+    index: any|Vue // Vue组件实例
+    editor: any|Vue // Vue组件实例
     
     constructor(config: any)
     {
