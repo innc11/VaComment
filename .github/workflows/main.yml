@@ -79,8 +79,7 @@ jobs:
 
           echo "--------------------"
 
-          
-          ls -al git
+          ls -al
 
           if [ "$tag_name" != "" ]
           then
