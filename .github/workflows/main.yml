@@ -21,7 +21,7 @@ jobs:
       - name: Load Cache For Git
         uses: actions/cache@v2
         with: 
-          path: git
+          path: **/git
           key: ${{ runner.os }}
       
       - name: Build
