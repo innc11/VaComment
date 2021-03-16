@@ -51,6 +51,8 @@ jobs:
           then
             mkdir ./git
           fi
+
+          ls -al
           
           cd git
 
@@ -73,6 +75,9 @@ jobs:
           git commit -m "Auto deploy from Github Actinos #$GITHUB_RUN_NUMBER on $datatime" || true
 
           echo "--------------------"
+
+          
+          ls -al git
 
           if [ "$tag_name" != "" ]
           then
