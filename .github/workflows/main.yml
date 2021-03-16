@@ -5,21 +5,24 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
-      - name: Prepare
-        run: sudo timedatectl set-timezone 'Asia/Shanghai'
-        
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Load Cache
+      - name: Load Cache For Node
         uses: actions/cache@v2
-        env: 
-          cache-name: node-modules
         with: 
-          path: ./node_modules
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          path: |
+            node_modules
+            .parcel-cache
+          key: ${{ runner.os }}-${{ hashFiles('yarn.lock', 'package.json') }}
+      
+      - name: Load Cache For Git
+        uses: actions/cache@v2
+        with: 
+          path: git
+          key: ${{ runner.os }}
       
       - name: Build
         run: |
@@ -34,22 +37,69 @@ jobs:
           file: "dist/*"
           draft: false
           tags: true
+          
+      - name: Check Out TagName
+        id: checkout-tagname
+        shell: "python3 {0}"
+        run: |
+          import os
+          import re
+
+          ref = os.getenv('GITHUB_REF', '')
+          match = re.search(r'refs\/tags\/(.*)', ref)
+          tag_name = match[1] if match is not None else ''
+
+          print('::set-output name=tag_name::'+tag_name)
 
       - name: Depoly Builds
         env:
           repository: https://${{ secrets.TOKEN }}@github.com/innc11/AweCommentFiles
           branch: main
+          tag_name: ${{ steps.checkout-tagname.outputs.tag_name }}
+        shell: bash
         run: |
-          export datatime=`date +"%b %d, %Y %H:%M:%S"`
-          cd dist
-          git init
-          git config user.email aprilforests@qq.com
-          git config user.name innc11
-          git status
-          git remote add github $repository
-          git checkout -b $branch
+          datatime=`TZ='Asia/Shanghai' date +"%b %d, %Y %H:%M:%S"`
+          echo $datatime
+
+          if [ ! -d "./git" ]
+          then
+            mkdir ./git
+          fi
+          
+          cd git
+
+          if [ ! -d "./.git" ]
+          then
+            echo "----------Init Git Repository----------"
+            git init
+            git config user.email aprilforests@qq.com
+            git config user.name innc11
+            git status
+            git remote add github $repository
+            git checkout -b $branch
+            echo "----------       Done       ----------"
+          fi
+          
+          git pull github $branch --rebase
+          cp -R ../dist/* .
           git add --all
-          git commit -m "Auto deploy from Github Actinos #$GITHUB_RUN_NUMBER on $datatime"
-          git push github $branch --force
+          git commit -m "Auto deploy from Github Actinos #$GITHUB_RUN_NUMBER on $datatime" || true
+
+          echo "--------------------"
+
+          if [ "$tag_name" != "" ]
+          then
+            git tag $tag_name
+            echo "Added tag: $tag_name"
+          else
+            echo "Not a tag push"
+          fi
+
+          echo "--------------------"
+
+          git push github $branch --tags
+
           echo "Successfully deployed!"
           echo "See: $repository/tree/$branch"
+
+
