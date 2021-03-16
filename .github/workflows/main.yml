@@ -14,14 +14,14 @@ jobs:
         uses: actions/cache@v2
         with: 
           path: |
-            node_modules
-            .parcel-cache
+            **/node_modules
+            **/.parcel-cache
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock', 'package.json') }}
       
       - name: Load Cache For Git
         uses: actions/cache@v2
         with: 
-          path: git
+          path: "**/git_temp"
           key: ${{ runner.os }}
       
       - name: Build
@@ -61,12 +61,12 @@ jobs:
           datatime=`TZ='Asia/Shanghai' date +"%b %d, %Y %H:%M:%S"`
           echo $datatime
 
-          if [ ! -d "./git" ]
+          if [ ! -d "./git_temp" ]
           then
-            mkdir ./git
+            mkdir ./git_temp
           fi
           
-          cd git
+          cd git_temp
 
           if [ ! -d "./.git" ]
           then
