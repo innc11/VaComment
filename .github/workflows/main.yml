@@ -13,13 +13,13 @@ jobs:
       - name: Load Cache For Node
         uses: actions/cache@v2
         with: 
-          path: "**/node_modules"
+          path: node_modules
           key: ${{ runner.os }}-${{ hashFiles('yarn.lock', 'package.json') }}
       
       - name: Load Cache For Git
         uses: actions/cache@v2
         with: 
-          path: "**/git"
+          path: git
           key: ${{ runner.os }}
       
       - name: Build
@@ -70,7 +70,6 @@ jobs:
           fi
           
           git pull github $branch --rebase
-          
           rm -rf ./*
           cp -R ../dist/* .
           git add --all
