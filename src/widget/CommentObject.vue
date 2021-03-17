@@ -31,7 +31,7 @@
 
                 <div class="ac-comment-content" v-html="parseMarkdown(comment.content)"></div>
 
-                <div class="ac-reply-wrapper"></div>
+                <div class="ac-reply-wrapper" v-bind:comment-id="comment.id"></div>
             </div>
         </div>
 

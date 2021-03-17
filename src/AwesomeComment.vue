@@ -100,11 +100,11 @@ export default Vue.extend({
             // 将编辑框移动到被回复的评论下方
             let cid = $(e.target).attr('comment-id')
             let editor = $('.ac-comment-editor')
-            let corespondingWrapper = $('#ac-comment-object-id-'+cid+' .ac-reply-wrapper')
+            let corespondingWrapper = $('#ac-comment-object-id-'+cid+' > .ac-comment-frame > .ac-comment-board > .ac-reply-wrapper')
             editor.appendTo(corespondingWrapper)
             $('.ac-cancel-reply').css('display', '')
 
-            let object = $('#ac-comment-object-id-'+cid+' .ac-nick').text()
+            let object = $('#ac-comment-object-id-'+cid+' > .ac-comment-frame > .ac-comment-board > .ac-comment-info > .ac-nick').text()
             let input = $('#awesome-comment-input')
             input.attr('placeholder', '@ '+object+',')
             input.focus()
