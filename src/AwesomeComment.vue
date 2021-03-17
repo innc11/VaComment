@@ -177,7 +177,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
     .awesome-comment-widget {
         transition: all 0.3s, opacity 0.1s;
 

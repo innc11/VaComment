@@ -69,7 +69,7 @@ export default Vue.extend({
 </script>
 
 
-<style lang="scss">
+<style scoped lang="scss">
     .smilie-set-widget {
         .smilie-sets-tab {
             width: 100%;

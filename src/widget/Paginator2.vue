@@ -115,7 +115,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
     .paginator {
         display: flex;
         padding-left: 0;

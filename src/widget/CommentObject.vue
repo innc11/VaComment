@@ -48,7 +48,7 @@
     </div>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
     @import "../index.scss";
 
     .comment-object {
