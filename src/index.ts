@@ -31,9 +31,11 @@ export default class AwesomeComment
         this.opt.elementId = config.elementId
     }
 
-    async create()
+    async create(config?: AwesomeCommentOptions)
     {
-        
+        if(typeof(config) == 'object')
+            this.opt = useDefault(config, this.opt)
+
         this.index = new AwesomeCommentWidget({
             el: '#'+this.opt.elementId,
             propsData: {
