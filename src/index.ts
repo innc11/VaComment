@@ -54,6 +54,19 @@ export default class AwesomeComment
         await this.refresh()
 
         await this.smilies()
+
+        this.jumpToComment()
+    }
+
+    jumpToComment()
+    {
+        let hash = location.hash
+        if(hash.startsWith('#ac-comment-object-id-'))
+        {
+            $('html, body').animate({
+                scrollTop: $(hash).offset().top
+            }, 1000)
+        }
     }
 
     destroy()
