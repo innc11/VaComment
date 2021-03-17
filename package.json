@@ -1,7 +1,6 @@
 {
-  "name": "valinear",
-  "version": "1.4.0",
-  "main": "index.ts",
+  "name": "awesome-comment",
+  "version": "1.4.1",
   "author": "innc11",
   "license": "MIT",
   "scripts": {

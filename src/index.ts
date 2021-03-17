@@ -1,73 +1,54 @@
 import Vue from 'vue'
 import indexvue from './AwesomeComment.vue'
 import { CreateElement } from 'vue/types/umd'
-import CommentingModel from './model/commentingModel'
-import CommentModel from './model/commentModel'
+import CommentingModel from './model/CommentingModel'
+import CommentModel from './model/CommentModel'
 import MissingNecessaryFieldError from './exception/MissingNecessaryFieldError'
 import IsServerSideError from './exception/IsServerSideError'
 import ServerSideException from './exception/ServerSideException'
-import './index.scss'
+import AwesomeCommentOptions from './model/AwesomeCommentOptions'
+import { useDefault } from './utils/Utils'
+import defaultOptions from './DefaultOptions'
 const $ = require('jquery')
 const cookies = require('brownies')
 const uaparser = require('ua-parser-js');
 
 export default class AwesomeComment
 {
-    api = 'http://127.0.0.1:600'
-    key: string
-    pageLabel: string
-    elementId: ''
-    language: any
-    paginatorbarLength = 4
-    mailEnabled = true
-    websiteEnabled = true
-    captchaEnabled = true
+    opt: AwesomeCommentOptions
 
     index: any|Vue // Vue组件实例
     editor: any|Vue // Vue组件实例
     
-    constructor(config: any)
+    constructor(config: AwesomeCommentOptions)
     {
         if (!config)
             throw new MissingNecessaryFieldError('setting-parameter-object')
         
         if (!config.elementId)
             throw new MissingNecessaryFieldError('elementId')
-            
-        this.elementId =   config.elementId
-        
-        this.key =         config.key || location.pathname
-        this.api =         config.api || this.api
-        this.pageLabel =   config.pageLabel || document.querySelector('title').innerText
-        this.language =    config.language || this.language
 
-        this.paginatorbarLength =   config.barLength!=null? config.barLength:this.paginatorbarLength
-        this.captchaEnabled = config.captchaEnabled!=null? config.captchaEnabled:this.captchaEnabled
-
-        this.mailEnabled =    config.mailEnabled!=null? config.mailEnabled:this.mailEnabled
-        this.websiteEnabled = config.websiteEnabled!=null? config.websiteEnabled:this.websiteEnabled
-        this.captchaEnabled = config.captchaEnabled!=null? config.captchaEnabled:this.captchaEnabled
+	    this.opt = useDefault(config, defaultOptions)
+        this.opt.elementId = config.elementId
     }
 
     async create()
     {
         this.index = new Vue({
-            el: '#'+this.elementId,
+            el: '#'+this.opt.elementId,
             render: (e: CreateElement) => e(indexvue)
         }).$children[0]
 
         this.editor = this.lookupVueComponent('comment-editor')
 
         this.index.owner = this
-        this.index.barLength = this.paginatorbarLength
-        this.index.mailEnabled = this.mailEnabled
-        this.index.websiteEnabled = this.websiteEnabled
-        this.index.captchaEnabled = this.captchaEnabled
+        this.index.barLength = this.opt.paginatorLength
+        this.index.mailEnabled = this.opt.mailRequired
+        this.index.websiteEnabled = this.opt.websiteRequired
+        this.index.captchaEnabled = this.opt.captchaRequired
 
         for (let component of this.lookupVueComponents('paginator'))
             component.owner = this
-
-        this.loadLanguage()
 
         this.loadCookies()
         
@@ -104,25 +85,6 @@ export default class AwesomeComment
                 result.push(this.index.$children[index])
         }
         return result
-    }
-
-    loadLanguage()
-    {
-        if(!this.language)
-            return
-        
-        if (this.language.comment)
-            this.editor.editorPlaceholder = this.language.comment
-
-        if (this.language.nick)
-            this.editor.nickPlaceholder = this.language.nick
-
-        if (this.language.mail)
-            this.editor.mailPlaceholder = this.language.mail
-
-        if (this.language.website)
-            this.editor.websitePlaceholder = this.language.website
-    
     }
 
     checkServerSide(): void
@@ -202,7 +164,7 @@ export default class AwesomeComment
         // 打开加载动画s
         this.index.isLoading = true
 
-        let url = `${this.api}/comment?key=${this.key}&pagination=${this.index.pagination_current}&label=${this.pageLabel}`
+        let url = `${this.opt.api}/comment?key=${this.opt.key}&pagination=${this.index.pagination_current}&label=${this.opt.pageLabel}`
 
         try {
             let json = await this.fetch2(url, {
@@ -269,10 +231,10 @@ export default class AwesomeComment
     async submit(comment: CommentingModel)
     {
         comment.parent = this.index.replyId
-        comment.key = this.key
-        comment.label = this.pageLabel
+        comment.key = this.opt.key
+        comment.label = this.opt.pageLabel
 
-        let url = this.api+'/comment'
+        let url = this.opt.api+'/comment'
 
         try {
             await this.fetch2(url, {
@@ -302,7 +264,7 @@ export default class AwesomeComment
     // 获取表情
     async smilies()
     {
-        let url = this.api+'/smilie_api'
+        let url = this.opt.api+'/smilie_api'
 
         try {
                 
@@ -315,7 +277,7 @@ export default class AwesomeComment
                 let smilieSet = sm[0]
                 this.editor.smiliesComponet.smilies[smilieSet] = {}
 
-                let url2 = this.api+'/smilie_api/'+smilieSet
+                let url2 = this.opt.api+'/smilie_api/'+smilieSet
                 
                 let res2 = await this.fetch2(url2, {
                     method: 'GET'
@@ -347,7 +309,7 @@ export default class AwesomeComment
 
     getCaptchaAPI()
     {
-        return this.api+'/captcha?_=' + (new Date().getTime())
+        return this.opt.api+'/captcha?_=' + (new Date().getTime())
     }
 
     static version()

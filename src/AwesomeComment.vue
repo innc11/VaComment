@@ -60,7 +60,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import CommentModel from './model/commentModel'
+import CommentModel from './model/CommentModel'
 import commentObject from './widget/CommentObject.vue'
 import commentEditor from './widget/CommentEditor.vue'
 import paginator from './widget/Paginator.vue'
