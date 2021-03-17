@@ -1,21 +1,22 @@
 import Vue from 'vue'
-import indexvue from './vaComment.vue'
+import indexvue from './AwesomeComment.vue'
 import { CreateElement } from 'vue/types/umd'
 import CommentingModel from './model/commentingModel'
 import CommentModel from './model/commentModel'
 import MissingNecessaryFieldError from './exception/MissingNecessaryFieldError'
 import IsServerSideError from './exception/IsServerSideError'
 import ServerSideException from './exception/ServerSideException'
+import './index.scss'
 const $ = require('jquery')
 const cookies = require('brownies')
 const uaparser = require('ua-parser-js');
 
-export default class VaComment
+export default class AwesomeComment
 {
     api = 'http://127.0.0.1:600'
     key: string
     pageLabel: string
-    elementId: 'va-comment-widget'
+    elementId: ''
     language: any
     paginatorbarLength = 4
     mailEnabled = true
@@ -30,9 +31,13 @@ export default class VaComment
         if (!config)
             throw new MissingNecessaryFieldError('setting-parameter-object')
         
+        if (!config.elementId)
+            throw new MissingNecessaryFieldError('elementId')
+            
+        this.elementId =   config.elementId
+        
         this.key =         config.key || location.pathname
         this.api =         config.api || this.api
-        this.elementId =   config.elementId || this.elementId
         this.pageLabel =   config.pageLabel || document.querySelector('title').innerText
         this.language =    config.language || this.language
 
@@ -51,7 +56,7 @@ export default class VaComment
             render: (e: CreateElement) => e(indexvue)
         }).$children[0]
 
-        this.editor = this.lookupVueComponent('va-editor-widget')
+        this.editor = this.lookupVueComponent('comment-editor')
 
         this.index.owner = this
         this.index.barLength = this.paginatorbarLength
@@ -59,7 +64,7 @@ export default class VaComment
         this.index.websiteEnabled = this.websiteEnabled
         this.index.captchaEnabled = this.captchaEnabled
 
-        for (let component of this.lookupVueComponents('va-paginator'))
+        for (let component of this.lookupVueComponents('paginator'))
             component.owner = this
 
         this.loadLanguage()
@@ -132,17 +137,25 @@ export default class VaComment
     {
         if (cookies.cookies.va_nick)
             this.editor.formData.nick = cookies.cookies.va_nick
+        else if (cookies.cookies.ac_nick)
+            this.editor.formData.nick = cookies.cookies.ac_nick
+
         if (cookies.cookies.va_mail)
             this.editor.formData.mail = cookies.cookies.va_mail
+        else if (cookies.cookies.ac_mail)
+            this.editor.formData.mail = cookies.cookies.ac_mail
+
         if (cookies.cookies.va_website)
             this.editor.formData.website = cookies.cookies.va_website
+        else if (cookies.cookies.ac_website)
+            this.editor.formData.website = cookies.cookies.ac_website
     }
 
     storageCookies()
     {
-        cookies.cookies.va_nick = this.editor.formData.nick
-        cookies.cookies.va_mail = this.editor.formData.mail
-        cookies.cookies.va_website = this.editor.formData.website
+        cookies.cookies.ac_nick = this.editor.formData.nick
+        cookies.cookies.ac_mail = this.editor.formData.mail
+        cookies.cookies.ac_website = this.editor.formData.website
     }
 
     async fetch2(input: RequestInfo, init?: RequestInit): Promise<any>
@@ -237,14 +250,16 @@ export default class VaComment
             if(e.name == 'ServerSideException')
             {
                 this.editor.showAlert('评论获取失败<br/>原因：'+e.message)
+            } else if(e.name == 'TypeError' && e.message == 'Failed to fetch') {
+                this.editor.showAlert('评论获取失败<br/>原因：网络连接失败或者协议问题无法与服务端通信<br/>'+e.message)
             } else {
-                this.editor.showAlert('评论获取失败<br/>原因：网络连接失败或者协议问题无法与服务端通信')
+                this.editor.showAlert('评论获取失败<br/>原因：发生了未知错误<br/>'+e.message)
             }
             
             this.index.isLoading = false
-        }
 
-        
+            throw e
+        }
 
         // 隐藏加载动画
         this.index.isLoading = false
@@ -273,10 +288,14 @@ export default class VaComment
         } catch(e) {
             if(e.name == 'ServerSideException')
             {
-                this.editor.showAlert('发表评论失败<br/>原因：'+e.message)
+                this.editor.showAlert('评论获取失败<br/>原因：'+e.message)
+            } else if(e.name == 'TypeError' && e.message == 'Failed to fetch') {
+                this.editor.showAlert('评论获取失败<br/>原因：网络连接失败或者协议问题无法与服务端通信<br/>'+e.message)
             } else {
-                this.editor.showAlert('发表评论失败<br/>原因：网络连接失败或者协议问题无法与服务端通信')
+                this.editor.showAlert('评论获取失败<br/>原因：发生了未知错误<br/>'+e.message)
             }
+
+            throw e
         }
     }
 
@@ -315,10 +334,14 @@ export default class VaComment
         } catch(e) {
             if(e.name == 'ServerSideException')
             {
-                this.editor.showAlert('获取表情失败<br/>原因：'+e.message)
+                this.editor.showAlert('评论获取失败<br/>原因：'+e.message)
+            } else if(e.name == 'TypeError' && e.message == 'Failed to fetch') {
+                this.editor.showAlert('评论获取失败<br/>原因：网络连接失败或者协议问题无法与服务端通信<br/>'+e.message)
             } else {
-                this.editor.showAlert('获取表情失败<br/>原因：网络连接失败或者协议问题无法与服务端通信')
+                this.editor.showAlert('评论获取失败<br/>原因：发生了未知错误<br/>'+e.message)
             }
+
+            throw e
         }
     }
 
@@ -339,4 +362,4 @@ export default class VaComment
 }
 
 // 暴露到全局变量
-window.VaComment = VaComment
+window.AwesomeComment = AwesomeComment

@@ -1,22 +1,21 @@
 <template>
-    <div class="va-paginator smilies-scrollbara" tabindex="-1">
+    <div class="paginator" tabindex="-1">
 
-        <div class="va-pagin va-pagin-fist"
-            style="margin-right: 20px;"
+        <div class="pagination first" style="margin-right: 20px;"
             v-if="firstDisplayed"
             v-bind:pagination="0"
             v-on:click="onClickPagination"
         >1</div>
 
-        <div class="va-pagin"
+        <div class="pagination"
             v-for="i in visibles"
+            v-bind:key="i"
             v-bind:class="i-1==current? 'active':''"
             v-bind:pagination="i-1"
             v-on:click="onClickPagination"
-            v-if="total>1"
         >
-            <div class="va-pain">{{i}}</div>
-            <div class="va-pain-icon">
+            <div class="text">{{i}}</div>
+            <div class="icon">
                 <div v-if="i-1==current && i-1!=0" v-bind:style="flip?'transform: rotate(180deg);':''">
                     <svg t="1606820644925" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1189" width="28" height="28"><path d="M748.172 510.713L527.533 290.074c-4.275-4.274-9.934-6.299-15.533-6.119-5.6-0.181-11.258 1.844-15.532 6.119L275.829 510.713c-8.201 8.201-8.201 21.5 0 29.701 8.202 8.202 21.5 8.202 29.702 0.001L512 333.945l206.469 206.47c8.203 8.201 21.5 8.201 29.703-0.001 8.201-8.201 8.201-21.5 0-29.701z" fill="#ffffff" p-id="1190"></path><path d="M748.172 704.202L527.533 483.564c-4.275-4.274-9.934-6.299-15.533-6.119-5.6-0.181-11.258 1.844-15.532 6.119L275.829 704.202c-8.201 8.201-8.201 21.5 0 29.701 8.202 8.203 21.5 8.203 29.702 0.002L512 527.436l206.469 206.47c8.203 8.201 21.5 8.201 29.703-0.002 8.201-8.202 8.201-21.501 0-29.702z" fill="#ffffff" p-id="1191"></path></svg>
                 </div>
@@ -28,12 +27,11 @@
             
         </div>
         
-        <div class="va-pagin va-pagin-last"
-            style="margin-left: 20px;"
+        <div class="pagination last" style="margin-left: 20px;"
             v-if="lastDisplayed"
-            v-bind:pagination="total"
+            v-bind:pagination="total-1"
             v-on:click="onClickPagination"
-        >{{total+1}}</div>
+        >{{total}}</div>
     </div>
 </template>
 
@@ -42,6 +40,7 @@ import Vue from 'vue'
 const $ = require('jquery')
 
 export default Vue.extend({
+    name: 'paginator',
     data: () => {
         return {
             owner: null,
@@ -71,13 +70,16 @@ export default Vue.extend({
     },
     computed: {
         visibles: function() {
+            if(this.total <= 1)
+                return []
+
             let count = this.barLength
             let begin = Math.max(this.current - count, 0)
             let end = Math.min(this.current + count, this.total)
 
             let result = []
 
-            for(let i=begin+1;i<end+2;i++)
+            for(let i=begin+1;i<end+1;i++)
                 result.push(i)
             
             return result
@@ -113,8 +115,8 @@ export default Vue.extend({
 })
 </script>
 
-<style>
-    .va-paginator {
+<style lang="scss">
+    .paginator {
         display: flex;
         padding-left: 0;
         list-style: none;
@@ -130,59 +132,58 @@ export default Vue.extend({
         max-width: 100%;
         box-sizing: border-box;
         outline: none;
+
+        .pagination {
+            flex-shrink: 0;
+            flex-direction: column;
+            font-size: 1rem !important;
+            width: 35px !important;
+            height: 35px !important;
+            border-radius: 50%!important;
+            transition: all 0.2s;
+            /* line-height: 46px; */
+            position: relative;
+            border: .0625rem solid #dee2e671;
+            cursor: pointer;
+            color: #7c7c7c;
+            display: flex;
+            margin: 0 3px;
+            padding: 0;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+
+            &:not(.active):hover {
+                border: .0625rem solid #68686894;
+                color: #3f3f3f;
+            }
+
+            &:hover {
+                transform: translateY(-4px);
+            }
+
+            &.active {
+                z-index: auto;
+                border-color: transparent;
+                background-color: #6fcfff;
+                color: #ffffff;
+                overflow: hidden;
+
+                * {
+                    transition: all 0.3s;
+                }
+
+                .text, .icon {
+                    transform: translateY(15px);
+                }
+
+                &:hover {
+                    .text, .icon {
+                        transform: translateY(-10px);
+                    }
+                }
+            }
+        }
+
     }
-
-    .va-pagin:hover {
-        transform: translateY(-4px);
-    }
-
-    .va-pagin.active {
-        z-index: auto;
-        border-color: transparent;
-        background-color: #6fcfff;
-        color: #ffffff;
-        overflow: hidden;
-    }
-
-    .va-pagin.active * {
-        transition: all 0.3s;
-    }
-
-    .va-pagin.active .va-pain,
-    .va-pagin.active .va-pain-icon {
-        transform: translateY(15px);
-    }
-
-    .va-pagin.active:hover .va-pain,
-    .va-pagin.active:hover .va-pain-icon {
-        transform: translateY(-10px);
-    }
-
-    .va-pagin {
-        flex-shrink: 0;
-        flex-direction: column;
-        font-size: 1rem !important;
-        width: 35px !important;
-        height: 35px !important;
-        border-radius: 50%!important;
-        transition: all 0.2s;
-        /* line-height: 46px; */
-        position: relative;
-        border: .0625rem solid #dee2e671;
-        cursor: pointer;
-        color: #7c7c7c;
-        display: flex;
-        margin: 0 3px;
-        padding: 0;
-        align-items: center;
-        justify-content: center;
-        user-select: none;
-    }
-
-    .va-pagin:not(.active):hover {
-        border: .0625rem solid #68686894;
-        color: #3f3f3f;
-    }
-
-
 </style>

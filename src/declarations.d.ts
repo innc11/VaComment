@@ -7,5 +7,5 @@ declare module '*.vue' {
 }
 
 declare interface Window {
-    VaComment: any
+    AwesomeComment: any
 }
