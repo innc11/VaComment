@@ -1,6 +1,5 @@
 import Vue from 'vue'
-import indexvue from './AwesomeComment.vue'
-import { CreateElement } from 'vue/types/umd'
+import AwesomeCommentWidget from './AwesomeComment.vue'
 import CommentingModel from './model/CommentingModel'
 import CommentModel from './model/CommentModel'
 import MissingNecessaryFieldError from './exception/MissingNecessaryFieldError'
@@ -34,18 +33,16 @@ export default class AwesomeComment
 
     async create()
     {
-        this.index = new Vue({
+        
+        this.index = new AwesomeCommentWidget({
             el: '#'+this.opt.elementId,
-            render: (e: CreateElement) => e(indexvue)
-        }).$children[0]
+            propsData: {
+                owner: this
+            }
+        })
+        // this.index.owner = this
 
         this.editor = this.lookupVueComponent('comment-editor')
-
-        this.index.owner = this
-        this.index.barLength = this.opt.paginatorLength
-        this.index.mailEnabled = this.opt.mailRequired
-        this.index.websiteEnabled = this.opt.websiteRequired
-        this.index.captchaEnabled = this.opt.captchaRequired
 
         for (let component of this.lookupVueComponents('paginator'))
             component.owner = this

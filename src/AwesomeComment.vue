@@ -2,36 +2,40 @@
     <div>
         <div class="awesome-comment-widget">
             <!-- 编辑框默认的位置，当回复某个评论时会被临时移动到对应的地方 -->
-            <div class="editor-wrapper">
+            <div class="ac-editor-wrapper">
                 <comment-editor
                     v-bind:owner="owner"
                     v-bind:is-replying="isReplying"
-                    v-bind:mail-enabled="mailEnabled"
-                    v-bind:website-enabled="websiteEnabled"
-                    v-bind:captcha-enabled="captchaEnabled"
+                    v-bind:mail-required="owner.opt.mailRequired"
+                    v-bind:website-required="owner.opt.websiteRequired"
+                    v-bind:captcha-required="owner.opt.captchaRequired"
+                    v-bind:editor-placeholder="owner.opt.language.editorPlaceholder"
+                    v-bind:nick-placeholder="owner.opt.language.nickPlaceholder"
+                    v-bind:mail-placeholder="owner.opt.language.mailPlaceholder"
+                    v-bind:website-placeholder="owner.opt.language.websitePlaceholder"
                     v-on:cancel-reply="onCancelReply"
                     v-bind="$attrs"
                 ></comment-editor>
             </div>
 
             <!-- 评论数量显示 -->
-            <div class="comment-count"><span v-html="getCommentCount()"></span></div>
+            <div class="ac-comment-count"><span v-html="getCommentCount()"></span></div>
 
             <!-- 头部页码条(只在非第一页时显示) -->
             <paginator 
-                class="paginator-head"
+                class="ac-paginator-head"
                 key="paginator-head"
                 v-bind:flip="true"
                 v-show="pagination_current!=0"
                 v-bind:total="pagination_total"
                 v-bind:current="pagination_current"
-                v-bind:barLength="barLength"
+                v-bind:barLength="owner.opt.paginatorLength"
                 v-on:pagination-changed="onPaginationChanged"
                 v-on:pagination-repeatedly-click="onHeadPaginationRepeatedlyClick"
             ></paginator>
 
             <!-- 评论列表 -->
-            <transition-group name="anim-comment-list" tag="div" class="all-comments">
+            <transition-group name="anim-comment-list" tag="div" class="ac-all-comments">
                 <comment 
                     v-for="comment in allComments"
                     v-bind:key="comment.id"
@@ -42,15 +46,15 @@
             </transition-group>
 
             <!-- 加载动画 -->
-            <div class="loading-indicator" v-show="showLoadingAnimation">正在加载</div>
+            <div class="ac-loading-indicator" v-show="showLoadingAnimation">正在加载</div>
             
             <!-- 底部页码条 -->
             <paginator 
-                class="paginator-foot"
+                class="ac-paginator-foot"
                 key="paginator-foot"
                 v-bind:total="pagination_total"
                 v-bind:current="pagination_current"
-                v-bind:barLength="barLength"
+                v-bind:barLength="owner.opt.paginatorLength"
                 v-on:pagination-changed="onPaginationChanged"
                 v-on:pagination-repeatedly-click="onFootPaginationRepeatedlyClick"
             ></paginator>
@@ -70,37 +74,37 @@ const $ = require('jquery')
 export default Vue.extend({
     name: 'awesome-comment',
     inheritAttrs: false,
-    data: () => {
-        return {
-            owner: null as AwesomeComment, // AwesomeComment
-            allComments: [] as Array<CommentModel>, // 所有的评论
-            commentCount: 0, // 所有的评论数量
-            isReplying: false, // 是否正在回复评论（是否显示'取消回复'按钮）
-            isLoading: false, // 是否显示加载动画
-            showLoadingAnimation: false, // 是否真正地显示加载动画
-            animationTimer: null, // 加载动画延迟显示计时器
-            delayTime: 1000, // 加载动画延迟显示的时间
-            replyId: -1, // 正在被回复的评论id（和isReplying功能类似）
-            pagination_total: 0, // 总页数
-            pagination_current: 0, // 当前页数
-            barLength: 3, // 翻页器的长度
-            mailEnabled: true, // 启用邮箱输入框
-            websiteEnabled: true, // 启用网站输入框
-            captchaEnabled: true // 启用验证码
+    props: {
+        owner: {
+            type: AwesomeComment,
+            required: true
         }
     },
+    data: () => ({
+        // owner: null as AwesomeComment, // AwesomeComment
+        allComments: [] as Array<CommentModel>, // 所有的评论
+        commentCount: 0, // 所有的评论数量
+        isReplying: false, // 是否正在回复评论（是否显示'取消回复'按钮）
+        isLoading: false, // 是否显示加载动画
+        showLoadingAnimation: false, // 是否真正地显示加载动画
+        animationTimer: null, // 加载动画延迟显示计时器
+        delayTime: 1000, // 加载动画延迟显示的时间
+        replyId: -1, // 正在被回复的评论id（和isReplying功能类似）
+        pagination_total: 0, // 总页数
+        pagination_current: 0, // 当前页数
+    }),
     methods: {
         onClickReply: function(e) {
             this.isReplying = true
 
             // 将编辑框移动到被回复的评论下方
             let cid = $(e.target).attr('comment-id')
-            let editor = $('.awesome-comment-widget .comment-editor')
-            let corespondingWrapper = $('#comment-object-id-'+cid+' .reply-wrapper')
+            let editor = $('.ac-comment-editor')
+            let corespondingWrapper = $('#ac-comment-object-id-'+cid+' .ac-reply-wrapper')
             editor.appendTo(corespondingWrapper)
-            $('.awesome-comment-widget .cancel-reply').css('display', '')
+            $('.ac-cancel-reply').css('display', '')
 
-            let object = $('#comment-object-id-'+cid+' .nick').text()
+            let object = $('#ac-comment-object-id-'+cid+' .ac-nick').text()
             let input = $('#awesome-comment-input')
             input.attr('placeholder', '@ '+object+',')
             input.focus()
@@ -111,9 +115,9 @@ export default Vue.extend({
             this.isReplying = false
 
             // 将编辑框移回它本来的位置
-            let edit = $('.awesome-comment-widget .comment-editor')
-            let defaultWrapper = $('.awesome-comment-widget .editor-wrapper')
-            $('.awesome-comment-widget .cancel-reply').css('display', 'none')
+            let edit = $('.ac-comment-editor')
+            let defaultWrapper = $('.ac-editor-wrapper')
+            $('.ac-cancel-reply').css('display', 'none')
             edit.appendTo(defaultWrapper)
 
             let input = $('#awesome-comment-input')
@@ -127,10 +131,10 @@ export default Vue.extend({
             this.pagination_current = num
         },
         onHeadPaginationRepeatedlyClick: function(num: number) {
-            $('.paginator-foot').focus()
+            $('.ac-paginator-foot').focus()
         },
         onFootPaginationRepeatedlyClick: function(num: number) {
-            $('.paginator-head').focus()
+            $('.ac-paginator-head').focus()
         },
         getCommentCount: function() {
             return (this.commentCount > 0)? this.commentCount+' 评论':''
@@ -177,11 +181,11 @@ export default Vue.extend({
 })
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
     .awesome-comment-widget {
         transition: all 0.3s, opacity 0.1s;
 
-        .comment-count {
+        .ac-comment-count {
             padding: 5px;
             font-weight: 600;
             font-size: 1.25em;
@@ -189,11 +193,11 @@ export default Vue.extend({
             margin-bottom: 1rem;
         }
 
-        .all-comments {
+        .ac-all-comments {
             padding: 0.5rem;
         }
 
-        .loading-indicator {
+        .ac-loading-indicator {
             text-align: center;
 
             &:before {

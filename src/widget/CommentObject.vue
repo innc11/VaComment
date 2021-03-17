@@ -1,84 +1,86 @@
 <template>
-    <div class="comment-object"  v-bind:id="'comment-object-id-'+comment.id"
+    <div class="ac-comment-object"  v-bind:id="'ac-comment-object-id-'+comment.id"
     >
-        <div class="comment-frame">
-            <img class="comment-avatar" 
+        <div class="ac-comment-frame">
+            <img class="ac-comment-avatar" 
                 v-bind:src="comment.avatar"
-                v-bind:class="smallerAvatar? 'comment-avatar-smaller':''"
+                v-bind:class="smallerAvatar? 'ac-comment-avatar-smaller':''"
                 v-bind:style="comment.website? 'cursor: pointer;':''"
                 v-bind:onclick="comment.website? 'window.open(\''+comment.website+'\', \'_blank\')':''"
             >
 
-            <div class="comment-board">
-                <div class="comment-info">
-                    <a class="nick" rel="nofollow" 
+            <div class="ac-comment-board">
+                <div class="ac-comment-info">
+                    <a class="ac-nick" rel="nofollow" 
                         v-bind:target="comment.website? '_blank':''"
                         v-bind:href="comment.website? comment.website:'javascript:void(0)'" 
-                        v-bind:class="comment.website? 'nick-with-link':''"
+                        v-bind:class="comment.website? 'ac-nick-with-link':''"
                     >{{comment.nick}}</a>
 
-                    <span class="badge-author" style="margin: 0;" v-if="comment.isauthor">{{comment.authorlabel}}</span>
+                    <span class="ac-badge-author" style="margin: 0;" v-if="comment.isauthor">{{comment.authorlabel}}</span>
 
-                    <span class="browser">{{(comment.ua.browser.name?comment.ua.browser.name:'')+' '+(comment.ua.browser.version?comment.ua.browser.version:'')}}</span>
-                    <span class="os" v-if="false">{{comment.ua.os.name+' '+comment.ua.os.version}}</span>
+                    <span class="ac-browser">{{(comment.ua.browser.name?comment.ua.browser.name:'')+' '+(comment.ua.browser.version?comment.ua.browser.version:'')}}</span>
+                    <span class="ac-os" v-if="false">{{comment.ua.os.name+' '+comment.ua.os.version}}</span>
                     <br/>
-                    <span class="time">{{parseDatetime(comment.time)}}</span>
-                    <span class="reply-button"
+                    <span class="ac-time">{{parseDatetime(comment.time)}}</span>
+                    <span class="ac-reply-button"
                         v-on:click="$emit('reply', $event)"
                         v-bind:comment-id="comment.id"
                     >回复</span>
                 </div>
 
-                <div class="comment-content" v-html="parseMarkdown(comment.content)"></div>
+                <div class="ac-comment-content" v-html="parseMarkdown(comment.content)"></div>
 
-                <div class="reply-wrapper"></div>
+                <div class="ac-reply-wrapper"></div>
             </div>
         </div>
 
-        <div class="replies">
+        <div class="ac-replies">
             <comment-object
                 v-for="cmt in comment.replies"
                 v-bind:key="cmt.time"
                 v-bind:comment="cmt" 
                 v-bind:smaller-avatar="true"
-                v-bind:class="indent(cmt.nick)? 'replies-indent':''"
+                v-bind:class="indent(cmt.nick)? 'ac-replies-indent':''"
                 v-on:reply="$emit('reply', $event)"
             ></comment-object>
         </div>
     </div>
 </template>
 
-<style scoped lang="scss">
+<style lang="scss">
     @import "../index.scss";
 
-    .comment-object {
+    .ac-comment-object {
         display: flex;
         flex-direction: column;
 
-        .comment-frame {
+        .ac-comment-frame {
             display: flex;
             flex-direction: row;
 
-            .comment-avatar {
-                width: 3.125em;
-                height: 3.125em;
-                float: left;
+            .ac-comment-avatar {
+                width: 44px;
+                height: 44px;
+                flex-shrink: 0;
                 border-radius: 50%;
-                margin-right: .7525em;
+                margin-right: 12px;
                 border: 1px solid #f5f5f5;
-                padding: .125em;
+                padding: 2px;
 
-                &.comment-avatar-smaller {
-                    width: 2.125em;
-                    height: 2.125em;
+                &.ac-comment-avatar-smaller {
+                    width: 28px;
+                    height: 28px;
                 }
             }
 
-            .comment-board {
+            .ac-comment-board {
                 flex-grow: 1;
+                width: 100%;
+                max-width: calc(100% - 62px);
 
-                .comment-info {
-                    .nick {
+                .ac-comment-info {
+                    .ac-nick {
                         @extend %awesome-comment-text;
 
                         transition: all 0.2s;
@@ -86,7 +88,7 @@
                         color: #1abc9c;
                         font-size: 1em !important;
 
-                        &.nick-with-link {
+                        &.ac-nick-with-link {
                             cursor: pointer;
 
                             &:hover {
@@ -95,7 +97,7 @@
                         }
                     }
                     
-                    .badge-author {
+                    .ac-badge-author {
                         color: #03acca;
                         background-color: #c3f3fb;
                         border-radius: 8px;
@@ -110,15 +112,15 @@
                         box-sizing: border-box;
                     }
 
-                    .browser, .os, .time {
+                    .ac-browser, .ac-os, .ac-time {
                         @extend %awesome-comment-text;
                         font-size: 0.75rem !important;
                         color: #b3b3b3;
                     }
 
-                    .reply-button {
+                    .ac-reply-button {
                         @extend %awesome-comment-text;
-                        font-size: 13px;
+                        font-size: 14px;
                         color: #aa8f70;
                         margin-left: 1rem;
                         cursor: pointer;
@@ -129,16 +131,18 @@
                     }
                 }
 
-                .comment-content {
+                .ac-comment-content {
                     @extend %awesome-comment-text;
                     @extend %awesome-comment-markdown;
-                    font-size: 14px;
+                    font-size: 16px;
+                    word-break: break-word;
+                    overflow-x: auto;
                 }
             }
         }
 
-        .replies {
-            .replies-indent {
+        .ac-replies {
+            .ac-replies-indent {
                 padding-left: 66px
             }
         }
@@ -147,13 +151,13 @@
     }
 
     // 评论分割线
-    .all-comments > div:not(.anim-comment-list-leave-active)~.comment-object:not(:first-child) > .comment-frame > .comment-board {
+    .ac-all-comments > div:not(.anim-comment-list-leave-active)~.ac-comment-object:not(:first-child) > .ac-comment-frame > .ac-comment-board {
         border-top: 1px solid #e5e9ef;
         padding-top: 14px;
     }
 
     // 分割线下面的评论头像要有一些margin-top
-    .all-comments > div:not(.anim-comment-list-leave-active)~.comment-object:not(:first-child) > .comment-frame > .comment-avatar {
+    .ac-all-comments > div:not(.anim-comment-list-leave-active)~.ac-comment-object:not(:first-child) > ac-.comment-frame > .ac-comment-avatar {
         margin-top: 14px;
     }
 

@@ -1,21 +1,21 @@
 <template>
-    <div class="paginator" tabindex="-1">
+    <div class="ac-paginator" tabindex="-1">
 
-        <div class="pagination first" style="margin-right: 20px;"
+        <div class="ac-pagination ac-first" style="margin-right: 20px;"
             v-if="firstDisplayed"
             v-bind:pagination="0"
             v-on:click="onClickPagination"
         >1</div>
 
-        <div class="pagination"
+        <div class="ac-pagination"
             v-for="i in visibles"
             v-bind:key="i"
-            v-bind:class="i-1==current? 'active':''"
+            v-bind:class="i-1==current? 'ac-active':''"
             v-bind:pagination="i-1"
             v-on:click="onClickPagination"
         >
-            <div class="text">{{i}}</div>
-            <div class="icon">
+            <div class="ac-text">{{i}}</div>
+            <div class="ac-icon">
                 <div v-if="i-1==current && i-1!=0" v-bind:style="flip?'transform: rotate(180deg);':''">
                     <svg t="1606820644925" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1189" width="28" height="28"><path d="M748.172 510.713L527.533 290.074c-4.275-4.274-9.934-6.299-15.533-6.119-5.6-0.181-11.258 1.844-15.532 6.119L275.829 510.713c-8.201 8.201-8.201 21.5 0 29.701 8.202 8.202 21.5 8.202 29.702 0.001L512 333.945l206.469 206.47c8.203 8.201 21.5 8.201 29.703-0.001 8.201-8.201 8.201-21.5 0-29.701z" fill="#ffffff" p-id="1190"></path><path d="M748.172 704.202L527.533 483.564c-4.275-4.274-9.934-6.299-15.533-6.119-5.6-0.181-11.258 1.844-15.532 6.119L275.829 704.202c-8.201 8.201-8.201 21.5 0 29.701 8.202 8.203 21.5 8.203 29.702 0.002L512 527.436l206.469 206.47c8.203 8.201 21.5 8.201 29.703-0.002 8.201-8.202 8.201-21.501 0-29.702z" fill="#ffffff" p-id="1191"></path></svg>
                 </div>
@@ -27,7 +27,7 @@
             
         </div>
         
-        <div class="pagination last" style="margin-left: 20px;"
+        <div class="ac-pagination ac-last" style="margin-left: 20px;"
             v-if="lastDisplayed"
             v-bind:pagination="total-1"
             v-on:click="onClickPagination"
@@ -75,7 +75,7 @@ export default Vue.extend({
 
             let count = this.barLength
             let begin = Math.max(this.current - count, 0)
-            let end = Math.min(this.current + count, this.total)
+            let end = Math.min(this.current + count+1, this.total)
 
             let result = []
 
@@ -89,7 +89,7 @@ export default Vue.extend({
             return begin > 0
         },
         lastDisplayed: function() {
-            let end = Math.min(this.current + this.barLength, this.total)
+            let end = Math.min(this.current + this.barLength+1, this.total)
             return end < this.total
         }
     },
@@ -115,8 +115,8 @@ export default Vue.extend({
 })
 </script>
 
-<style scoped lang="scss">
-    .paginator {
+<style lang="scss">
+    .ac-paginator {
         display: flex;
         padding-left: 0;
         list-style: none;
@@ -133,7 +133,7 @@ export default Vue.extend({
         box-sizing: border-box;
         outline: none;
 
-        .pagination {
+        .ac-pagination {
             flex-shrink: 0;
             flex-direction: column;
             font-size: 1rem !important;
@@ -153,7 +153,7 @@ export default Vue.extend({
             justify-content: center;
             user-select: none;
 
-            &:not(.active):hover {
+            &:not(.ac-active):hover {
                 border: .0625rem solid #68686894;
                 color: #3f3f3f;
             }
@@ -162,7 +162,7 @@ export default Vue.extend({
                 transform: translateY(-4px);
             }
 
-            &.active {
+            &.ac-active {
                 z-index: auto;
                 border-color: transparent;
                 background-color: #6fcfff;
@@ -173,12 +173,12 @@ export default Vue.extend({
                     transition: all 0.3s;
                 }
 
-                .text, .icon {
+                .ac-text, .ac-icon {
                     transform: translateY(15px);
                 }
 
                 &:hover {
-                    .text, .icon {
+                    .ac-text, .ac-icon {
                         transform: translateY(-10px);
                     }
                 }

@@ -11,7 +11,7 @@ export default {
         mailPlaceholder: '邮箱',
         websitePlaceholder: '网站',
     } as LanguageOptions,
-    paginatorLength: 4,
+    paginatorLength: 3,
     mailRequired: true,
     websiteRequired: true,
     captchaRequired: true,
