@@ -63,7 +63,7 @@ import Vue from 'vue'
 import CommentModel from './model/CommentModel'
 import commentObject from './widget/CommentObject.vue'
 import commentEditor from './widget/CommentEditor.vue'
-import paginator from './widget/Paginator.vue'
+import paginator from     './widget/Paginator2.vue'
 import AwesomeComment from '.'
 const $ = require('jquery')
 
