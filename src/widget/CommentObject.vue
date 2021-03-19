@@ -60,8 +60,8 @@
             flex-direction: row;
 
             .ac-comment-avatar {
-                width: 44px;
-                height: 44px;
+                width: 50px;
+                height: 50px;
                 flex-shrink: 0;
                 border-radius: 50%;
                 margin-right: 12px;
@@ -69,8 +69,8 @@
                 padding: 2px;
 
                 &.ac-comment-avatar-smaller {
-                    width: 28px;
-                    height: 28px;
+                    width: 40px;
+                    height: 40px;
                 }
             }
 
