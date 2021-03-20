@@ -8,6 +8,7 @@ import ServerSideException from './exception/ServerSideException'
 import AwesomeCommentOptions from './model/AwesomeCommentOptions'
 import { useDefault } from './utils/Utils'
 import defaultOptions from './DefaultOptions'
+import UnknownException from './exception/UnknownException'
 const $ = require('jquery')
 const cookies = require('brownies')
 const uaparser = require('ua-parser-js');
@@ -159,6 +160,9 @@ export default class AwesomeComment
             throw new ServerSideException(str)
         }
 
+        if(!response.ok)
+            throw new UnknownException(await response.text())
+
         let raw = await response.text()
 
         try {
@@ -229,6 +233,9 @@ export default class AwesomeComment
             } else {
                 this.editor.showAlert('评论获取失败<br/>原因：发生了未知错误<br/>'+e.message)
             }
+
+            this.editor.alertMessage.button2 = '尝试重试加载评论列表'
+            this.editor.alertMessage.cb_button2 = () => setTimeout(() => this.refresh(), 300)
             
             this.index.isLoading = false
 
@@ -262,12 +269,15 @@ export default class AwesomeComment
         } catch(e) {
             if(e.name == 'ServerSideException')
             {
-                this.editor.showAlert('评论获取失败<br/>原因：'+e.message)
+                this.editor.showAlert('评论提交失败<br/>原因：'+e.message)
             } else if(e.name == 'TypeError' && e.message == 'Failed to fetch') {
-                this.editor.showAlert('评论获取失败<br/>原因：网络连接失败或者协议问题无法与服务端通信<br/>'+e.message)
+                this.editor.showAlert('评论提交失败<br/>原因：网络连接失败或者协议问题无法与服务端通信<br/>'+e.message)
             } else {
-                this.editor.showAlert('评论获取失败<br/>原因：发生了未知错误<br/>'+e.message)
+                this.editor.showAlert('评论提交失败<br/>原因：发生了未知错误<br/>'+e.message)
             }
+
+            this.editor.alertMessage.button2 = '尝试重试提交评论'
+            this.editor.alertMessage.cb_button2 = () => setTimeout(() => this.submit(comment), 300)
 
             throw e
         }
@@ -308,12 +318,15 @@ export default class AwesomeComment
         } catch(e) {
             if(e.name == 'ServerSideException')
             {
-                this.editor.showAlert('评论获取失败<br/>原因：'+e.message)
+                this.editor.showAlert('表情获取失败<br/>原因：'+e.message)
             } else if(e.name == 'TypeError' && e.message == 'Failed to fetch') {
-                this.editor.showAlert('评论获取失败<br/>原因：网络连接失败或者协议问题无法与服务端通信<br/>'+e.message)
+                this.editor.showAlert('表情获取失败<br/>原因：网络连接失败或者协议问题无法与服务端通信<br/>'+e.message)
             } else {
-                this.editor.showAlert('评论获取失败<br/>原因：发生了未知错误<br/>'+e.message)
+                this.editor.showAlert('表情获取失败<br/>原因：发生了未知错误<br/>'+e.message)
             }
+
+            // this.editor.alertMessage.button2 = '尝试重试加载表情'
+            // this.editor.alertMessage.cb_button2 = () => setTimeout(() => this.smilies(), 300)
 
             throw e
         }
