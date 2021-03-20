@@ -24,15 +24,15 @@
             >
         </div>
         
-        <textarea id="awesome-comment-input" 
-            class="ac-input" 
-            v-bind:placeholder="editorPlaceholder" 
-            v-bind:default-placeholder="editorPlaceholder" 
-            v-model="formData.content"
-        ></textarea>
-        
-        <div class="ac-toolbar">
-            <div class="ac-preview">
+        <div style="position: relative">
+            <textarea id="awesome-comment-input" 
+                class="ac-input" 
+                v-bind:placeholder="editorPlaceholder" 
+                v-bind:default-placeholder="editorPlaceholder" 
+                v-model="formData.content"
+            ></textarea>
+
+            <div class="ac-toolbar">
                 <div class="ac-button" title="预览" v-on:click="previewVisible = !previewVisible">
                     <svg style="margin-right: 4px;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="17688" width="22" height="22"><path d="M502.390154 935.384615a29.538462 29.538462 0 1 1 0 59.076923H141.430154C79.911385 994.461538 29.538462 946.254769 29.538462 886.153846V137.846154C29.538462 77.745231 79.950769 29.538462 141.390769 29.538462h741.218462c61.44 0 111.852308 48.206769 111.852307 108.307692v300.268308a29.538462 29.538462 0 1 1-59.076923 0V137.846154c0-26.899692-23.355077-49.230769-52.775384-49.230769H141.390769c-29.420308 0-52.775385 22.331077-52.775384 49.230769v748.307692c0 26.899692 23.355077 49.230769 52.775384 49.230769h360.999385z" p-id="17689"></path><path d="M196.923077 216.615385m29.538461 0l374.153847 0q29.538462 0 29.538461 29.538461l0 0q0 29.538462-29.538461 29.538462l-374.153847 0q-29.538462 0-29.538461-29.538462l0 0q0-29.538462 29.538461-29.538461Z" p-id="17690"></path><path d="M649.846154 846.769231a216.615385 216.615385 0 1 0 0-433.230769 216.615385 216.615385 0 0 0 0 433.230769z m0 59.076923a275.692308 275.692308 0 1 1 0-551.384616 275.692308 275.692308 0 0 1 0 551.384616z" p-id="17691"></path><path d="M807.398383 829.479768m20.886847-20.886846l0 0q20.886846-20.886846 41.773692 0l125.321079 125.321079q20.886846 20.886846 0 41.773693l0 0q-20.886846 20.886846-41.773693 0l-125.321078-125.321079q-20.886846-20.886846 0-41.773693Z" p-id="17692"></path></svg>
                     预览
@@ -41,8 +41,6 @@
                     <svg style="margin-right: 4px;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="16172" width="22" height="22"><path d="M512 1024a512 512 0 1 1 512-512 512 512 0 0 1-512 512zM512 56.888889a455.111111 455.111111 0 1 0 455.111111 455.111111 455.111111 455.111111 0 0 0-455.111111-455.111111zM312.888889 512A85.333333 85.333333 0 1 1 398.222222 426.666667 85.333333 85.333333 0 0 1 312.888889 512z" p-id="16173"></path><path d="M512 768A142.222222 142.222222 0 0 1 369.777778 625.777778a28.444444 28.444444 0 0 1 56.888889 0 85.333333 85.333333 0 0 0 170.666666 0 28.444444 28.444444 0 0 1 56.888889 0A142.222222 142.222222 0 0 1 512 768z" p-id="16174"></path><path d="M782.222222 391.964444l-113.777778 59.733334a29.013333 29.013333 0 0 1-38.684444-10.808889 28.444444 28.444444 0 0 1 10.24-38.684445l113.777778-56.888888a28.444444 28.444444 0 0 1 38.684444 10.24 28.444444 28.444444 0 0 1-10.24 36.408888z" p-id="16175"></path><path d="M640.568889 451.697778l113.777778 56.888889a27.875556 27.875556 0 0 0 38.684444-10.24 27.875556 27.875556 0 0 0-10.24-38.684445l-113.777778-56.888889a28.444444 28.444444 0 0 0-38.684444 10.808889 28.444444 28.444444 0 0 0 10.24 38.115556z" p-id="16176"></path></svg>
                     表情
                 </div>
-            </div>
-            <div class="ac-submit">
                 <div class="ac-captcha" v-if="captchaRequired">
                     <img title="点击刷新" style="border-radius: 3px;" v-bind:src="captchaUrl" v-on:click="refreshCaptcha"></img>
                     <input type="text" class="ac-input" style="margin-left: 7px;" placeholder="验证码" v-model="formData.captcha">
@@ -50,7 +48,7 @@
                 <div type="button" class="ac-button" v-on:click="onComment">提交</div>
             </div>
         </div>
-
+        
         <div class="ac-panels">
 
             <div class="ac-preview-panel" v-if="previewVisible">
@@ -71,7 +69,10 @@
         <div class="ac-alert-info" v-show="alertMessage.text!=''">
             <div class="ac-h">
                 <div class="ac-text" v-html="alertMessage.text"></div>
-                <button type="button" class="ac-button" v-on:click="hideAlert">{{alertMessage.button}}</button>
+                <div>
+                    <button type="button" class="ac-button" v-on:click="cbButton1">{{alertMessage.button}}</button>
+                    <button type="button" class="ac-button" v-show="alertMessage.button2!=''" v-on:click="cbButton2">{{alertMessage.button2}}</button>
+                </div>
             </div>
         </div>
     </div>
@@ -163,25 +164,23 @@ export default Vue.extend({
         hideAlert: function () {
             this.alertMessage.text = ''
         },
-        showAlert: function (message, button='OK') {
+        showAlert: function (message: string, button='OK') {
             this.alertMessage.text = message
+        },
+        cbButton1: function() {
+            if(this.alertMessage.cb_button1)
+                this.alertMessage.cb_button1()
+            this.hideAlert()
+        },
+        cbButton2: function() {
+            if(this.alertMessage.cb_button2)
+                this.alertMessage.cb_button2()
+            this.hideAlert()
+
+            this.alertMessage.cb_button2 = null
+            this.alertMessage.button2 = ''
         }
     },
-    // computed: {
-    //     : '网站',
-    //     mailEnabled: {
-    //         type: Boolean,
-    //         required: true
-    //     },
-    //     websiteEnabled: {
-    //         type: Boolean,
-    //         required: true
-    //     },
-    //     captchaEnabled: {
-    //         type: Boolean,
-    //         required: true
-    //     },
-    // },
     data: () => ({
         smiliesComponet: null,
         formData: {
@@ -191,7 +190,10 @@ export default Vue.extend({
         },
         alertMessage: {
             text: '',
-            button: '好的'
+            button: '好的',
+            button2: '',
+            cb_button1: null,
+            cb_button2: null,
         },
         captchaUrl: '',
         previewVisible: false,
@@ -302,37 +304,33 @@ export default Vue.extend({
         }
 
         .ac-toolbar {
+            position: absolute;
+            right: 15px;
+            bottom: 15px;
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: row;
+            justify-content: flex-end;
 
-            .ac-preview {
-                width: 25%;
-                min-width: 160px;
+            &>div:not(:last-child) {
+                margin-right: 6px;
             }
 
-            .ac-submit {
-                width: 75%;
-                display: flex;
-                flex-direction: row;
-                justify-content: flex-end;
+            .ac-captcha {
+                display: inline-flex;
+                margin: 0px 8px;
 
-                .ac-captcha {
-                    display: inline-flex;
-                    margin: 0px 8px;
+                img {
+                    cursor: pointer;
+                }
 
-                    img {
-                        cursor: pointer;
-                    }
-
-                    input {
-                        border-bottom: 1px solid#dedede;
-                        min-width: unset;
-                        padding-top: 0px;
-                        padding-bottom: 0px;
-                        font-size: 1.2rem;
-                        font-family: var(--awesome-comment-font-monospace) !important;
-                        width: 80px;
-                    }
+                input {
+                    border-bottom: 1px solid#dedede;
+                    min-width: unset;
+                    padding-top: 0px;
+                    padding-bottom: 0px;
+                    font-size: 1.2rem;
+                    font-family: var(--awesome-comment-font-monospace) !important;
+                    width: 80px;
                 }
             }
         }
@@ -370,6 +368,9 @@ export default Vue.extend({
             width: 100%;
             height: 100%;
             top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
             display: flex;
             align-items: center;
             flex-direction: column;
