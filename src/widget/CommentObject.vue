@@ -60,8 +60,8 @@
             flex-direction: row;
 
             .ac-comment-avatar {
-                width: 50px;
-                height: 50px;
+                width: 45px;
+                height: 45px;
                 flex-shrink: 0;
                 border-radius: 50%;
                 margin-right: 12px;
@@ -69,8 +69,8 @@
                 padding: 2px;
 
                 &.ac-comment-avatar-smaller {
-                    width: 40px;
-                    height: 40px;
+                    width: 35px;
+                    height: 35px;
                 }
             }
 
@@ -157,7 +157,7 @@
     }
 
     // 分割线下面的评论头像要有一些margin-top
-    .ac-all-comments > div:not(.anim-comment-list-leave-active)~.ac-comment-object:not(:first-child) > ac-.comment-frame > .ac-comment-avatar {
+    .ac-all-comments > div:not(.anim-comment-list-leave-active)~.ac-comment-object:not(:first-child) > .ac-comment-frame > .ac-comment-avatar {
         margin-top: 14px;
     }
 
