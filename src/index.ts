@@ -9,9 +9,15 @@ import AwesomeCommentOptions from './model/AwesomeCommentOptions'
 import { useDefault } from './utils/Utils'
 import defaultOptions from './DefaultOptions'
 import UnknownException from './exception/UnknownException'
+import DOMPurify = require('dompurify')
+import cheerio = require('cheerio')
 const $ = require('jquery')
 const cookies = require('brownies')
 const uaparser = require('ua-parser-js');
+const moment = require('moment');
+require('moment/locale/zh-cn');
+
+moment.locale('zh-cn')
 
 export default class AwesomeComment
 {
@@ -149,16 +155,15 @@ export default class AwesomeComment
         for (const obj in defaultOptions)
             if(!_init[obj])
                 _init[obj] = defaultOptions[obj]
-
+        
+        if(init.headers)
+            (init.headers as any)['Content-Type'] = 'application/json'
+            else
+            init.headers = {
+                'Content-Type': 'application/json'
+            }
 
         let response = await fetch(input, init)
-
-        if (response.headers.has('X-Extra-Message')) 
-        {
-            let em = response.headers.get('X-Extra-Message');
-            let str = Buffer.from(em, 'base64').toString()
-            throw new ServerSideException(str)
-        }
 
         if(!response.ok)
             throw new UnknownException(await response.text())
@@ -180,7 +185,10 @@ export default class AwesomeComment
         // 打开加载动画s
         this.index.isLoading = true
 
-        let url = `${this.opt.api}/comment?key=${this.opt.key}&pagination=${this.index.pagination_current}&label=${this.opt.pageLabel}`
+        let url = this.opt.api + '/comment?'
+        url += 'path=' + this.opt.key + '&'
+        url += 'pageSize=10&'
+        url += 'page=' + (this.index.pagination_current + 1)
 
         try {
             let json = await this.fetch2(url, {
@@ -193,34 +201,43 @@ export default class AwesomeComment
                 return 0
             }
     
-            let parseData = function(comments: any[])
+            let parseData = (comments: any[]) =>
             {
                 let allcomments = [] as Array<CommentModel>
     
                 for (let comment of comments)
                 {
+                    let che = cheerio.load(comment.comment) as any
+                    che('p a').remove()
+                    let content = DOMPurify.sanitize(che.text(''), {ALLOWED_TAGS: [], KEEP_CONTENT: false})
+                    if(content.startsWith(' , '))
+                        content = content.substr(2)
+
                     allcomments.push({
-                        id: comment.id,
-                        avatar: comment.avatar,
+                        id: comment.objectId,
+                        parentId: comment.pid || '',
+                        rootId: comment.rid || '',
+                        avatar: 'https://www.gravatar.com/avatar/'+comment.mail+'&f=y',
                         nick: comment.nick,
-                        website: comment.website,
-                        isauthor: comment.isauthor,
-                        authorlabel: comment.authorlabel,
-                        ua: uaparser(comment.useragent),
-                        time: comment.time,
-                        content: comment.content,
-                        replies: parseData(comment.replies.slice(0).sort(sortfun))
-                    } )
+                        website: comment.link,
+                        isauthor: comment.mail==this.opt.authorMail || ('type' in comment && comment['type']=='administrator'),
+                        authorlabel: '作者',
+                        browser: comment.browser,
+                        os: comment.os,
+                        time: moment(comment.insertedAt).unix(),
+                        content: content,
+                        replies: 'children' in comment? parseData(comment.children.slice(0).sort(sortfun)):[]
+                    } as CommentModel)
                 }
     
-                return allcomments
+                return allcomments as CommentModel[]
             }
     
             // 加载(并显示)评论数据
-            this.index.allComments = parseData(json.comments) as CommentModel[]
+            this.index.allComments = parseData(json.data)
     
             // 加载分页数据
-            this.index.pagination_total = json.pages
+            this.index.pagination_total = json.totalPages
     
             // 设置评论数量
             this.index.commentCount = json.count
@@ -249,22 +266,32 @@ export default class AwesomeComment
     // 提交评论
     async submit(comment: CommentingModel)
     {
-        comment.parent = this.index.replyId
+        comment.parent = this.index.replyId == -1? undefined:this.index.replyId
+        comment.root = this.index.replyRootId == -1? undefined:(this.index.replyRootId==''? comment.parent:this.index.replyRootId)
+        comment.at = this.index.replyNick == -1? undefined:this.index.replyNick
         comment.key = this.opt.key
-        comment.label = this.opt.pageLabel
 
         let url = this.opt.api+'/comment'
 
         try {
             await this.fetch2(url, {
                 method: 'POST',
-                body: JSON.stringify(comment),
+                body: JSON.stringify({
+                    comment: comment.content,
+                    link: comment.website,
+                    mail: comment.mail,
+                    nick: comment.nick,
+                    pid: comment.parent,
+                    rid: comment.root,
+                    ua: navigator.userAgent || '',
+                    url: comment.key,
+                    at: comment.at
+                }),
             })
 
             this.editor.formData.content = ''
             this.editor.$emit('cancel-reply')
             this.storageCookies()
-            this.editor.refreshCaptcha() // 刷新验证码
             await this.refresh() // 刷新评论
         } catch(e) {
             if(e.name == 'ServerSideException')
@@ -286,35 +313,31 @@ export default class AwesomeComment
     // 获取表情
     async smilies()
     {
-        let url = this.opt.api+'/smilie_api'
+        if(!('smiliesUrl' in this.opt))
+            return
 
         try {
-                
-            let res = await this.fetch2(url, {
-                method: 'GET'
-            })
+            let res = await this.fetch2(this.opt.smiliesUrl, { method: 'GET' })
+            let baseurl = res.url
 
-            let allSmilieSets = res[1]
-            for (let sm of allSmilieSets) {
-                let smilieSet = sm[0]
+            for (const key in res) 
+            {
+                if(key == 'url')
+                    continue
+                
+                let smilieSet = key
                 this.editor.smiliesComponet.smilies[smilieSet] = {}
 
-                let url2 = this.opt.api+'/smilie_api/'+smilieSet
-                
-                let res2 = await this.fetch2(url2, {
-                    method: 'GET'
-                })
-
-                let urlHeader = res2[0]
-                let allSmilies = res2[1]
-                for (let sm2 of allSmilies) {
-                    let smiliesName = sm2;
-                    this.editor.smiliesComponet.smilies[smilieSet][smiliesName] = urlHeader+smilieSet+'/'+smiliesName
-                    this.editor.smiliesComponet.$forceUpdate()
-                    this.editor.smiliesComponet.defaultSmilieSet()
+                for (const filename of res[smilieSet])
+                {
+                    let url = baseurl+'/'+smilieSet+'/'+filename
+                    this.editor.smiliesComponet.smilies[smilieSet][filename] = url
                 }
             }
 
+            this.editor.smiliesComponet.$forceUpdate()
+            this.editor.smiliesComponet.defaultSmilieSet()
+            this.index.update()
         } catch(e) {
             if(e.name == 'ServerSideException')
             {
@@ -325,16 +348,11 @@ export default class AwesomeComment
                 this.editor.showAlert('表情获取失败<br/>原因：发生了未知错误<br/>'+e.message)
             }
 
-            // this.editor.alertMessage.button2 = '尝试重试加载表情'
-            // this.editor.alertMessage.cb_button2 = () => setTimeout(() => this.smilies(), 300)
+            this.editor.alertMessage.button2 = '尝试重试加载表情'
+            this.editor.alertMessage.cb_button2 = () => setTimeout(() => this.smilies(), 300)
 
             throw e
         }
-    }
-
-    getCaptchaAPI()
-    {
-        return this.opt.api+'/captcha?_=' + (new Date().getTime())
     }
 
     static version()

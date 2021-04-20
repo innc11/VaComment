@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "brownies": "^3.0.0",
+    "cheerio": "^1.0.0-rc.6",
     "dompurify": "^2.2.2",
     "hanabi": "^0.4.0",
     "jquery": "^3.5.1",

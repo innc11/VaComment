@@ -19,13 +19,15 @@
 
                     <span class="ac-badge-author" style="margin: 0;" v-if="comment.isauthor">{{comment.authorlabel}}</span>
 
-                    <span class="ac-browser">{{(comment.ua.browser.name?comment.ua.browser.name:'')+' '+(comment.ua.browser.version?comment.ua.browser.version:'')}}</span>
-                    <span class="ac-os" v-if="false">{{comment.ua.os.name+' '+comment.ua.os.version}}</span>
+                    <span class="ac-browser">{{comment.browser}}</span>
+                    <span class="ac-os" v-if="false">{{comment.os}}</span>
                     <br/>
                     <span class="ac-time">{{parseDatetime(comment.time)}}</span>
                     <span class="ac-reply-button"
                         v-on:click="$emit('reply', $event)"
                         v-bind:comment-id="comment.id"
+                        v-bind:comment-root-id="comment.rootId"
+                        v-bind:nick="comment.nick"
                     >回复</span>
                 </div>
 
@@ -39,6 +41,7 @@
             <comment-object
                 v-for="cmt in comment.replies"
                 v-bind:key="cmt.time"
+                v-bind:owner="owner"
                 v-bind:comment="cmt" 
                 v-bind:smaller-avatar="true"
                 v-bind:class="indent(cmt.nick)? 'ac-replies-indent':''"
@@ -166,6 +169,7 @@
 <script lang="ts">
 import { type } from 'os';
 import Vue from 'vue'
+import AwesomeComment from '..';
 import marked2 from '../utils/markedLib'
 const moment = require('moment');
 require('moment/locale/zh-cn');
@@ -213,6 +217,18 @@ export default Vue.extend({
             return true
         },
         parseMarkdown: function (text) {
+            // 解析表情
+            for(let k in this.owner.editor.smiliesComponet.smilies)
+            {
+                let sms = this.owner.editor.smiliesComponet.smilies[k]
+                for(let sm in sms)
+                {
+                    let url = sms[sm]
+                    let el = '<img class="ac-smilie" src="'+url+'" alt="'+sm+'" />';
+                    text = text.replace(':'+sm+':', el)
+                }
+            }
+
             return marked2(text)
         },
         parseDatetime: function(timestamp: number) {
@@ -224,9 +240,18 @@ export default Vue.extend({
                 lastWeek: 'YYYY-MM-DD HH:mm',
                 sameElse: 'YYYY-MM-DD HH:mm'
             })
+        },
+        update: function() {
+            this.$forceUpdate()
+            for (const child of this.$children) 
+                child.update()
         }
     },
     props: {
+        owner: {
+            type: AwesomeComment,
+            required: true
+        },
         comment: {
             type: Object, // instance of CommentModel
             required: true

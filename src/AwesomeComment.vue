@@ -8,7 +8,6 @@
                     v-bind:is-replying="isReplying"
                     v-bind:mail-required="owner.opt.mailRequired"
                     v-bind:website-required="owner.opt.websiteRequired"
-                    v-bind:captcha-required="owner.opt.captchaRequired"
                     v-bind:editor-placeholder="owner.opt.language.editorPlaceholder"
                     v-bind:nick-placeholder="owner.opt.language.nickPlaceholder"
                     v-bind:mail-placeholder="owner.opt.language.mailPlaceholder"
@@ -39,6 +38,7 @@
                 <comment 
                     v-for="comment in allComments"
                     v-bind:key="comment.id"
+                    v-bind:owner="owner"
                     v-bind:comment="comment"
                     v-bind:smaller-avatar="false"
                     v-on:reply="onClickReply"
@@ -90,6 +90,8 @@ export default Vue.extend({
         animationTimer: null, // 加载动画延迟显示计时器
         delayTime: 100, // 加载动画延迟显示的时间
         replyId: -1, // 正在被回复的评论id（和isReplying功能类似）
+        replyRootId: -1, // 正在被回复的评论的根评论id
+        replyNick: '',  // 正在被回复的评论的昵称
         pagination_total: 0, // 总页数
         pagination_current: 0, // 当前页数
     }),
@@ -99,6 +101,9 @@ export default Vue.extend({
 
             // 将编辑框移动到被回复的评论下方
             let cid = $(e.target).attr('comment-id')
+            let rid = $(e.target).attr('comment-root-id')
+            let nick = $(e.target).attr('nick')
+            
             let editor = $('.ac-comment-editor')
             let corespondingWrapper = $('#ac-comment-object-id-'+cid+' > .ac-comment-frame > .ac-comment-board > .ac-reply-wrapper')
             editor.appendTo(corespondingWrapper)
@@ -110,6 +115,8 @@ export default Vue.extend({
             input.focus()
 
             this.replyId = cid
+            this.replyRootId = rid
+            this.replyNick = nick
         },
         onCancelReply: function() {
             this.isReplying = false
@@ -124,6 +131,8 @@ export default Vue.extend({
             input.attr('placeholder', input.attr('default-placeholder'))
 
             this.replyId = -1
+            this.replyRootId = -1
+            this.replyNick = ''
         },
         onPaginationChanged: function(num: number) {
             // 切换页时要将编辑框移回去，不然就消失了
@@ -138,7 +147,14 @@ export default Vue.extend({
         },
         getCommentCount: function() {
             return (this.commentCount > 0)? this.commentCount+' 评论':''
-        }
+        },
+        update: function() { // 重新绘制组件
+            this.$forceUpdate()
+            for (const child of this.$children)
+                if(child.name == 'anim-comment-list')
+                    for (const gchild of child.$children)
+                        gchild.update()
+        },
     },
     watch: {
         pagination_total: function (newV, oldV) {
@@ -221,8 +237,6 @@ export default Vue.extend({
         }
 
     }
-    
-    
 
     /* vue 动画 */
     .anim-comment-list-enter-active {

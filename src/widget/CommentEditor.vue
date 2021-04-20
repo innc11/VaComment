@@ -41,11 +41,11 @@
                     <svg style="margin-right: 4px;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="16172" width="22" height="22"><path d="M512 1024a512 512 0 1 1 512-512 512 512 0 0 1-512 512zM512 56.888889a455.111111 455.111111 0 1 0 455.111111 455.111111 455.111111 455.111111 0 0 0-455.111111-455.111111zM312.888889 512A85.333333 85.333333 0 1 1 398.222222 426.666667 85.333333 85.333333 0 0 1 312.888889 512z" p-id="16173"></path><path d="M512 768A142.222222 142.222222 0 0 1 369.777778 625.777778a28.444444 28.444444 0 0 1 56.888889 0 85.333333 85.333333 0 0 0 170.666666 0 28.444444 28.444444 0 0 1 56.888889 0A142.222222 142.222222 0 0 1 512 768z" p-id="16174"></path><path d="M782.222222 391.964444l-113.777778 59.733334a29.013333 29.013333 0 0 1-38.684444-10.808889 28.444444 28.444444 0 0 1 10.24-38.684445l113.777778-56.888888a28.444444 28.444444 0 0 1 38.684444 10.24 28.444444 28.444444 0 0 1-10.24 36.408888z" p-id="16175"></path><path d="M640.568889 451.697778l113.777778 56.888889a27.875556 27.875556 0 0 0 38.684444-10.24 27.875556 27.875556 0 0 0-10.24-38.684445l-113.777778-56.888889a28.444444 28.444444 0 0 0-38.684444 10.808889 28.444444 28.444444 0 0 0 10.24 38.115556z" p-id="16176"></path></svg>
                     表情
                 </div>
-                <div class="ac-captcha" v-if="captchaRequired">
-                    <img title="点击刷新" style="border-radius: 3px;" v-bind:src="captchaUrl" v-on:click="refreshCaptcha"></img>
-                    <input type="text" class="ac-input" style="margin-left: 7px;" placeholder="验证码" v-model="formData.captcha">
+                <div type="button" class="ac-button" v-on:click="onComment">
+                    <!-- 加载动画 -->
+                    <div class="ac-submiting-indicator" v-show="showSubmitingAnimation"></div>
+                    提交
                 </div>
-                <div type="button" class="ac-button" v-on:click="onComment">提交</div>
             </div>
         </div>
         
@@ -89,11 +89,27 @@ import AwesomeComment from '..'
 export default Vue.extend({
     name: 'comment-editor',
     mounted: function() {
-        setTimeout(() => this.captchaUrl = this.owner.getCaptchaAPI(), 10)
         inserfunc()
 
         this.smiliesComponet = this.$children[0]
     },
+    data: () => ({
+        smiliesComponet: null,
+        formData: {
+            nick: '', mail: '',
+            website: '', content: '',
+        },
+        alertMessage: {
+            text: '',
+            button: '好的',
+            button2: '',
+            cb_button1: null,
+            cb_button2: null,
+        },
+        showSubmitingAnimation: false, // 正在提交评论的动画
+        previewVisible: false, // 显示预览面板
+        smiliesVisible: false, // 显示标签面板
+    }),
     methods: {
         parseMarkdown: function (text) {
             // 解析表情
@@ -120,13 +136,6 @@ export default Vue.extend({
                 return
             }
 
-            if (process.env.NODE_ENV === 'production' && this.captchaRequired) {
-                if (!this.formData.captcha) {
-                    this.showAlert('需要填写验证码哦')
-                    return
-                }
-            }
-
             if (this.formData.mail && this.mailRequired) {
                 let reg = new RegExp('^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$', 'g')
                 if (!this.formData.mail.match(reg)) {
@@ -144,22 +153,24 @@ export default Vue.extend({
                 }
             }
 
+            if(this.showSubmitingAnimation)
+            {
+                this.showAlert('评论正在提交，请等待')
+                return
+            }
+
             this.owner.submit({
                 nick: this.formData.nick,
                 mail: this.formData.mail,
                 website: this.formData.website,
                 content: this.formData.content,
-                captcha: this.formData.captcha,
-            } as CommentingModel)
+            } as CommentingModel).then(() => {
+                this.showSubmitingAnimation = false
+            })
+
+            this.showSubmitingAnimation = true
 
             this.owner.refresh()
-        },
-        refreshCaptcha: function (e) {
-            this.formData.captcha = ''
-            this.captchaUrl = ''
-            setTimeout(() => {
-                this.captchaUrl = this.owner.getCaptchaAPI()
-            }, 10)
         },
         hideAlert: function () {
             this.alertMessage.text = ''
@@ -181,24 +192,6 @@ export default Vue.extend({
             this.alertMessage.button2 = ''
         }
     },
-    data: () => ({
-        smiliesComponet: null,
-        formData: {
-            nick: '', mail: '',
-            website: '', content: '',
-            captcha: ''
-        },
-        alertMessage: {
-            text: '',
-            button: '好的',
-            button2: '',
-            cb_button1: null,
-            cb_button2: null,
-        },
-        captchaUrl: '',
-        previewVisible: false,
-        smiliesVisible: false,
-    }),
     watch: {
         smiliesVisible: function(newV, oldV)
         {
@@ -219,10 +212,6 @@ export default Vue.extend({
             required: true
         },
         websiteRequired: {
-            type: Boolean,
-            required: true
-        },
-        captchaRequired: {
             type: Boolean,
             required: true
         },
@@ -254,7 +243,7 @@ export default Vue.extend({
     @import "../index.scss";
 
     .ac-comment-editor {
-        border-bottom: 1px solid #f0f0f0;
+        // border-bottom: 1px solid #f0f0f0;
         // border-radius: 4px;
         margin-bottom: 10px;
         overflow: hidden;
@@ -314,25 +303,6 @@ export default Vue.extend({
             &>div:not(:last-child) {
                 margin-right: 6px;
             }
-
-            .ac-captcha {
-                display: inline-flex;
-                margin: 0px 8px;
-
-                img {
-                    cursor: pointer;
-                }
-
-                input {
-                    border-bottom: 1px solid#dedede;
-                    min-width: unset;
-                    padding-top: 0px;
-                    padding-bottom: 0px;
-                    font-size: 1.2rem;
-                    font-family: var(--awesome-comment-font-monospace) !important;
-                    width: 80px;
-                }
-            }
         }
 
         .ac-tool-panel {
@@ -375,6 +345,7 @@ export default Vue.extend({
             align-items: center;
             flex-direction: column;
             background-color: #4d4d4dc2;
+            overflow: auto;
 
             .ac-h {
                 display: flex;
@@ -391,6 +362,30 @@ export default Vue.extend({
 
             * {
                 color: #ece9e7 !important;
+            }
+        }
+
+
+        .ac-submiting-indicator {
+            text-align: center;
+
+            &:before {
+                content: "";
+                box-sizing: border-box;
+                display: inline-block;
+                width: 15px;
+                height: 15px;
+                border: 3px solid #a0a0a0;
+                border-top-color: transparent;
+                border-bottom-color: transparent;
+                border-radius: 50%;
+                animation: spin 2s infinite linear;
+            }
+
+            @keyframes spin
+            {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(1turn); }
             }
         }
     }
